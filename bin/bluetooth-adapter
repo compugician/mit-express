@@ -1,0 +1,50 @@
+#!/usr/bin/env node
+
+var btSerial = new (require('bluetooth-serial-port')).BluetoothSerialPort();
+
+// handle incoming bluetooth data
+var dataCallback = function(buffer) {
+  console.log(buffer.toString('utf-8'));
+}
+
+btSerial.on('found', function(address, name) {
+  // TODO check for correct device
+  if (address) {
+    btSerial.findSerialPortChannel(address,
+      function(channel) {
+        btSerial.connect(address, channel, function() {
+          console.log('connected');
+
+          btSerial.on('data', dataCallback);
+        }, function () {
+          console.log('cannot connect');
+        });
+      },
+      function() {
+        console.log('found nothing');
+      });
+  }
+});
+
+// start searching
+btSerial.inquire();
+
+process.stdin.resume();//so the program will not close instantly
+
+function exitHandler(options, err) {
+  if (options.cleanup) {
+    console.log("closed");
+    btSerial.close();
+  }
+  if (err) console.log(err.stack);
+  if (options.exit) process.exit();
+}
+
+//do something when app is closing
+process.on('exit', exitHandler.bind(null,{cleanup:true}));
+
+//catches ctrl+c event
+process.on('SIGINT', exitHandler.bind(null, {exit:true}));
+
+//catches uncaught exceptions
+process.on('uncaughtException', exitHandler.bind(null, {exit:true}));

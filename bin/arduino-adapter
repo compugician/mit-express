@@ -1,0 +1,67 @@
+#!/usr/bin/env node
+
+var serialport = require("serialport");
+var io = require('socket.io-client');
+
+serialport.list(function (err, ports) {
+  ports.forEach(function(port) {
+    //TODO detect the correct port here instead of hardcoding
+    console.log(port.comName); 
+  });
+});
+
+var serial = new serialport.SerialPort("/dev/cu.usbmodem1411", {
+  baudrate: 9600
+});
+
+var socket = io('http://localhost:3000');
+
+var lastData, dx, dy, xdir, ydir, line;
+
+serial.on("open", function () {
+  console.log('serial opened');
+
+  socket.on('point-client', function (data) {
+    // console.log(data);
+    if (lastData) {
+      // TODO instead of deltas, calibrate and use absolute
+      dx = data.x - lastData.x;
+      dy = data.y - lastData.y;
+
+      xdir = dx < 0 ? 1 : 0; // TODO double check direction
+      ydir = dy < 0 ? 1 : 0; // TODO double check direction
+
+      line = xdir + " " + ydir + " " + Math.abs(dx) + " " + Math.abs(dy) +
+        " " + data.colorIdx + " " + data.flow;
+      console.log(line);
+
+      serial.write(line + "\n", function(err, results) {
+        if (err) {
+          console.error('err ' + err);
+        }
+      });
+    }
+    lastData = data;
+  });
+
+  process.stdin.resume(); //so the program will not close instantly
+
+  function exitHandler(options, err) {
+      if (options.cleanup) {
+        console.log("serial closed");
+        serial.close();
+      }
+      if (err) console.log(err.stack);
+      if (options.exit) process.exit();
+  }
+
+  //do something when app is closing
+  process.on('exit', exitHandler.bind(null,{cleanup:true}));
+
+  //catches ctrl+c event
+  process.on('SIGINT', exitHandler.bind(null, {exit:true}));
+
+  //catches uncaught exceptions
+  process.on('uncaughtException', exitHandler.bind(null, {exit:true}));
+
+});

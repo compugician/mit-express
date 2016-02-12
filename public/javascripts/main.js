@@ -31,7 +31,9 @@ function draw() {
     noStroke();
 	fill(255, 255, 255, 255);
 	ellipse(point1.x, point1.y, point1.dotDiameter*11/10, point1.dotDiameter*11/10);
-    fill(point1.color.r, point1.color.g, point1.color.b, 255);
+	fill(0, 0, 0, 255);
+    ellipse(point1.x, point1.y, point1.dotDiameter, point1.dotDiameter);
+    fill(point1.color.r, point1.color.g, point1.color.b, point1.color.a);
     ellipse(point1.x, point1.y, point1.dotDiameter, point1.dotDiameter);
 
   }

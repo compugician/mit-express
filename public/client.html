@@ -36,7 +36,7 @@ function draw() {
       r: r,
       g: g,
       b: b,
-      a: 2.55*flow
+      a: 255*flow/100
     },
     colorIdx: colorIdx,
     flow: flow
@@ -58,7 +58,10 @@ function keyPressed() {
 			}
 			break;
 		case (DOWN_ARROW):
-			flow = (flow - 10) ? flow > 10 : 0;
+			flow -= 10
+			if (flow < 0){
+				flow = 0;
+			}
 			break;
 		case (RIGHT_ARROW):
 			dotDiameter += 5;

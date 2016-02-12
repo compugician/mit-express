@@ -36,7 +36,7 @@ function draw() {
       r: r,
       g: g,
       b: b,
-      a: 255
+      a: 2.55*flow
     },
     colorIdx: colorIdx,
     flow: flow
@@ -44,27 +44,32 @@ function draw() {
 }
 
 function mousePressed() {
-  dotDiameter = Math.random() * 15 + 10;
   r = Math.random() * 156 + 100;
   g = Math.random() * 156 + 100;
   b = Math.random() * 156 + 100;
 }
 
 function keyPressed() {
-  if (keyCode === UP_ARROW) {
-    flow+=10;
-    if (flow > 100) flow = 100;
-    return false;
-  }
-  if (keyCode === DOWN_ARROW) {
-    flow-=10;
-    if (flow < 0) flow = 0;
-    return false;
-  }
+	switch(keyCode){
+		case (UP_ARROW):
+			flow += 10
+			if (flow > 100){
+				flow = 100;
+			}
+			break;
+		case (DOWN_ARROW):
+			flow = (flow - 10) ? flow > 10 : 0;
+			break;
+		case (RIGHT_ARROW):
+			dotDiameter += 5;
+			break;
+		case (LEFT_ARROW):
+			dotDiameter -= 5;
+			break;
+	}
+	
   if (parseInt(key) || key === '0') {
     colorIdx = parseInt(key) * 2;
-    return false;
   }
-  return true;
 }
 </script>

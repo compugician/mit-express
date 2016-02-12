@@ -29,8 +29,11 @@ function draw() {
   if (queue.length > 0) {
     point1 = queue[queue.length - 1];
     noStroke();
+	fill(255, 255, 255, 255);
+	ellipse(point1.x, point1.y, point1.dotDiameter*11/10, point1.dotDiameter*11/10);
     fill(point1.color.r, point1.color.g, point1.color.b, 255);
     ellipse(point1.x, point1.y, point1.dotDiameter, point1.dotDiameter);
+
   }
 
   // draw point trail
@@ -41,7 +44,7 @@ function draw() {
     point2 = queue[i + 1];
     pointEnd = i == queue.length - 2 ? queue[i + 1] : queue[i + 2];
     strokeWeight(point2.dotDiameter);
-    stroke(point2.color.r, point2.color.g, point2.color.b, point2.color.a);
+    stroke(point2.color.r, point2.color.g, point2.color.b, point2.color.a*(i/queue.length));
     curve(pointBegin.x, pointBegin.y,
       point1.x, point1.y,
       point2.x, point2.y,

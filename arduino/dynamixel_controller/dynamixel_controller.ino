@@ -9,6 +9,7 @@ int16_t speed=256;
 // Use this if you want a sofware serial interface (communication speed will be limited)
 DynamixelInterface &interface=*createSoftSerialInterface(2,3);
 
+//TODO: use array instead
 int cwlimit1 = 65;
 int ccwlimit1 = 915;
 int cwlimit2 = 870;
@@ -36,6 +37,7 @@ void colorSelect(int index) {
 
 void flowSet(int percent) {
   if (percent < 0 || percent > 100) return;
+  //TODO: is this if necessary?
   if (percent == 0) {
     motor3.position(ccwlimit3);
   }
@@ -48,9 +50,10 @@ void setup()
 { 
   Serial.begin(9600);
   delay(100);
-  interface.begin(57142);
+  interface.begin(57142); //TODO: magic number?? why this? ask jonathan
   delay(100);
   
+  //TODO: many repeats.
   motor1.init();
   motor1.enableTorque();
   motor1.speed(speed);

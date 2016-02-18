@@ -10,7 +10,7 @@ serialport.list(function (err, ports) {
   });
 });
 
-var serial = new serialport.SerialPort("/dev/cu.usbmodem1411", {
+var serial = new serialport.SerialPort("COM5", {
   baudrate: 9600
 });
 

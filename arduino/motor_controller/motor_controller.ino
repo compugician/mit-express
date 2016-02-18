@@ -94,14 +94,18 @@ void colorSelect(int index) {
 
 void flowSet(int percent) {
   if (percent < 0 || percent > 100) return;
+  motor3.led(true);
+  delay(10);
   if (percent == 0) {
     motor3.position(ccwlimit3);
   }
   else {
     motor3.position(ccwlimit3 - (percent * (ccwlimit3 - cwlimit3)/100));
   }
+  delay(50);
+  motor3.led(false);
 }
-//
+
 unsigned long lastReceivedAt;
 int stepScale = 8;
 
@@ -114,6 +118,18 @@ void loop() {
   }
 
   while (Serial.available() > 0) {
+//    motor1.led(true);
+//    delay(100);
+//    motor2.led(true);
+//    delay(100);
+//    motor3.led(true);
+//    delay(100);
+//    motor1.led(false);
+//    delay(100);
+//    motor2.led(false);
+//    delay(100);
+//    motor3.led(false);
+//    delay(100);
     lastReceivedAt = millis();
     // parse out values
     int xdir = Serial.parseInt();
@@ -135,20 +151,20 @@ void loop() {
         digitalWrite(steppin, LOW);
         digitalWrite(steppin, HIGH);
       }
-      // TODO ydir
-
-      // dynamixel signals
-      motor1.led(true);
-      delay(10);
+//      // TODO ydir
+//
+//      // dynamixel signals
+//      motor3.led(true);
+      delay(20);
       colorSelect(colorIdx);
-      delay(10);
-      paintEnable(flow > 0); // in case it was off, turn it on before flow
+      delay(20);
+//      paintEnable(flow > 0); // in case it was off, turn it on before flow
       delay(10);
       flowSet(flow);
       delay(10);
-      paintEnable(flow > 0); // if it was on, turn it off after flow
-      delay(10);
-      motor1.led(false);
+//      paintEnable(flow > 0); // if it was on, turn it off after flow
+//      delay(20);
+//      motor3.led(false);
     }
   }
 }

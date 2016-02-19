@@ -18,23 +18,18 @@ var socket = io('http://localhost:3000');
 
 var lastData, dx, dy, xdir, ydir, line;
 var timeSinceLastSend = Date.now();
-
+var i = 0;
 serial.on("open", function () {
   console.log('serial opened');
 
   socket.on('point-client', function (data) {
     // console.log(data);
-    if (lastData && Date.now() - timeSinceLastSend > 150) {
-      // TODO instead of deltas, calibrate and use absolute
-      dx = data.x - lastData.x;
-      dy = data.y - lastData.y;
-
-      xdir = dx < 0 ? 1 : 0; // TODO double check direction
-      ydir = dy < 0 ? 1 : 0; // TODO double check direction
-
-      line = xdir + " " + ydir + " " + Math.abs(dx) + " " + Math.abs(dy) +
-        " " + data.colorIdx + " " + data.flow;
-      console.log(line);
+    if (lastData && Date.now() - timeSinceLastSend > 300) {
+	  // send absolute mouse position. Need to add 8 (for some reason the top left corner is (-8, -8))
+	  line = Math.floor(data.x) + " " + Math.floor(data.y) 
+			 + " " + data.colorIdx + " " + data.flow;
+	  i += 1;
+      console.log(i + ": " + line);
 
       serial.write(line + "\n", function(err, results) {
         if (err) {

@@ -113,42 +113,32 @@ void loop() {
       paintEnable(false);
   }
 
+  if (Serial.available() == 0){
+    motor3.led(true);
+    delay(100);
+    motor3.led(false);
+  }
   while (Serial.available() > 0) {
     lastReceivedAt = millis();
     // parse out values
-    int xdir = Serial.parseInt();
-    int ydir = Serial.parseInt();
-    int dx = Serial.parseInt();
-    int dy = Serial.parseInt();
+    int x = Serial.parseInt();
+    int y = Serial.parseInt();
     int colorIdx = Serial.parseInt();
     int flow = Serial.parseInt();
 
     if (Serial.read() == '\n') {
-      // clearpath signals
-      if (xdir) {
-        digitalWrite(dirpin, HIGH);
-      }
-      else {
-        digitalWrite(dirpin, LOW);
-      }
-      for (int i = 0; i < dx * stepScale; i++) {
-        digitalWrite(steppin, LOW);
-        digitalWrite(steppin, HIGH);
-      }
-//      // TODO ydir
-//
-//      // dynamixel signals
-//      motor3.led(true);
-      delay(20);
+//    dynamixel signals
+      motor1.led(true);
+      delay(10);
       colorSelect(colorIdx);
-      delay(20);
+      delay(10);
       paintEnable(flow > 0); // in case it was off, turn it on before flow
-      delay(30);
+      delay(10);
       flowSet(flow);
-      delay(30);
-//      paintEnable(flow > 0); // if it was on, turn it off after flow
-//      delay(20);
-//      motor3.led(false);
+      delay(10);
+      paintEnable(flow > 0); // if it was on, turn it off after flow
+      delay(10);
+      motor1.led(false);
     }
   }
 }

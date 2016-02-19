@@ -25,8 +25,8 @@ function setup() {
 }
 function draw() {
   socket.emit('point', {
-    x: mouseX,
-    y: mouseY,
+    x: mouseX + 8,
+    y: mouseY + 8,
     dotDiameter: dotDiameter,
     color: {
       r: r,

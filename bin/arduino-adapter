@@ -5,70 +5,70 @@ var io = require('socket.io-client');
 var dataQueue = [] //FIFO
 
 serialport.list(function (err, ports) {
-  ports.forEach(function(port) {
-    //TODO detect the correct port here instead of hardcoding
-    console.log(port.comName); 
-  });
+	ports.forEach(function(port) {
+		//TODO detect the correct port here instead of hardcoding
+		console.log(port.comName); 
+	});
 });
 
 var serial = new serialport.SerialPort("COM5", {
-  baudrate: 9600
+	baudrate: 9600
 });
 
 var socket = io('http://localhost:3000');
 
-var lastData, dx, dy, xdir, ydir, line;
+var lastData, line;
 var timeSinceLastSend = Date.now();
+
 serial.on("open", function () {
-  console.log('serial opened');
-  socket.on('point-client', function (data) {
-	  
-	  line = Math.floor(data.x) + " " + Math.floor(data.y) 
-			 + " " + data.colorIdx + " " + data.flow;
+	console.log('serial opened');
+	socket.on('point-client', function (data) {
+		var x = Math.floor(data.x)
+		var y = Math.floor(data.y)
+
+		line = x + " " + y + " " + data.colorIdx + " " + data.flow;
 		dataQueue.push(line);
 		
-		nextData = dataQueue.shift();
-	  while (dataQueue.join("\n").length >= 512){
-		dataQueue.shift();
-	  }
+		do {
+			nextData = dataQueue.shift();
+		} while (dataQueue.join("\n").length >= 1024); //only retain the most recent 1024 bits of data
 
-    // console.log(data);
-    if (Date.now() - timeSinceLastSend > 60) {
-	  // send absolute mouse position. Need to add 8 (for some reason the top left corner is (-8, -8))
-	  line = Math.floor(data.x) + " " + Math.floor(data.y) 
-			 + " " + data.colorIdx + " " + data.flow;
-      console.log(nextData+"\n");
+		// 60ms gives the servos enough time to update (arduino requires 50 ms delay)
+		if (Date.now() - timeSinceLastSend > 60) {
+			console.log(nextData + "\n");
 
-      serial.write(nextData + "\n", function(err, results) {
-        if (err) {
-          console.error('err ' + err);
-        }
-      });
-	  timeSinceLastSend = Date.now();
-	  dataQueue = []
-    }
-    lastData = data;
+			serial.write(nextData + "\n", function(err, results) {
+				if (err) {
+				  console.error('err ' + err);
+				}
+			});
+			
+			timeSinceLastSend = Date.now();
+			dataQueue = []
+		}
+		
+		lastData = data;
 	
-  });
+	});
 
-  process.stdin.resume(); //so the program will not close instantly
+	process.stdin.resume(); //so the program will not close instantly
 
-  function exitHandler(options, err) {
-      if (options.cleanup) {
-        console.log("serial closed");
-        serial.close();
-      }
-      if (err) console.log(err.stack);
-      if (options.exit) process.exit();
-  }
+	function exitHandler(options, err) {
+		if (options.cleanup) {
+			console.log("serial closed");
+			serial.close();
+		}
+		if (err) console.log(err.stack);
+		if (options.exit) process.exit();
+	}
 
-  //do something when app is closing
-  process.on('exit', exitHandler.bind(null,{cleanup:true}));
+	//do something when app is closing
+	process.on('exit', exitHandler.bind(null,{cleanup:true}));
 
-  //catches ctrl+c event
-  process.on('SIGINT', exitHandler.bind(null, {exit:true}));
+	//catches ctrl+c event
+	process.on('SIGINT', exitHandler.bind(null, {exit:true}));
 
-  //catches uncaught exceptions
-  process.on('uncaughtException', exitHandler.bind(null, {exit:true}));
+	//catches uncaught exceptions
+	process.on('uncaughtException', exitHandler.bind(null, {exit:true}));
 
 });

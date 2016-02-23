@@ -29,6 +29,7 @@ void setup() {
   //clearpath init
   pinMode(dirpin, OUTPUT);
   pinMode(steppin, OUTPUT);
+//  pinMode(SERIAL_DIRECTION, OUTPUT);
   pinMode(enable, OUTPUT);
   digitalWrite(enable, HIGH);
   delay(100);
@@ -74,6 +75,7 @@ void setup() {
   }
   
   delay(1000);
+  Serial.println("Ready!");
 }
 
 // dynamixel functions
@@ -107,17 +109,12 @@ int stepScale = 8;
 
 void loop() {
   // 5 second timeout if no serial command received
-  if (millis() - lastReceivedAt > 15000) {
+  if (millis() - lastReceivedAt > 5000) {
       flowSet(0);
       delay(100);
       paintEnable(false);
   }
 
-  if (Serial.available() == 0){
-    motor3.led(true);
-    delay(100);
-    motor3.led(false);
-  }
   while (Serial.available() > 0) {
     lastReceivedAt = millis();
     // parse out values

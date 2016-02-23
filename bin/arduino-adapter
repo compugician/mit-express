@@ -12,13 +12,18 @@ serialport.list(function (err, ports) {
 });
 
 var serial = new serialport.SerialPort("COM5", {
-	baudrate: 9600
+	baudrate: 9600,
+	parser: serialport.parsers.readline("\n")
 });
 
 var socket = io('http://localhost:3000');
 
 var lastData, line;
 var timeSinceLastSend = Date.now();
+
+serial.on("data", function (data) {
+	console.log("A:"+data);
+});
 
 serial.on("open", function () {
 	console.log('serial opened');

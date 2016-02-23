@@ -2,6 +2,7 @@
 
 var serialport = require("serialport");
 var io = require('socket.io-client');
+var dataQueue = [] //FIFO
 
 serialport.list(function (err, ports) {
   ports.forEach(function(port) {
@@ -18,25 +19,33 @@ var socket = io('http://localhost:3000');
 
 var lastData, dx, dy, xdir, ydir, line;
 var timeSinceLastSend = Date.now();
-var i = 0;
 serial.on("open", function () {
   console.log('serial opened');
-
   socket.on('point-client', function (data) {
+	  
+	  line = Math.floor(data.x) + " " + Math.floor(data.y) 
+			 + " " + data.colorIdx + " " + data.flow;
+		dataQueue.push(line);
+		
+		nextData = dataQueue.shift();
+	  while (dataQueue.join("\n").length >= 512){
+		dataQueue.shift();
+	  }
+
     // console.log(data);
-    if (lastData && Date.now() - timeSinceLastSend > 300) {
+    if (Date.now() - timeSinceLastSend > 60) {
 	  // send absolute mouse position. Need to add 8 (for some reason the top left corner is (-8, -8))
 	  line = Math.floor(data.x) + " " + Math.floor(data.y) 
 			 + " " + data.colorIdx + " " + data.flow;
-	  i += 1;
-      console.log(i + ": " + line);
+      console.log(nextData+"\n");
 
-      serial.write(line + "\n", function(err, results) {
+      serial.write(nextData + "\n", function(err, results) {
         if (err) {
           console.error('err ' + err);
         }
       });
 	  timeSinceLastSend = Date.now();
+	  dataQueue = []
     }
     lastData = data;
 	

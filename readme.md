@@ -1,5 +1,5 @@
 # Project Express
-
+Based off the work done by Jonathan Zong: (https://github.com/jonathanzong/project-express)
 Node server, socket.io/serial adapter, and arduino sketches for Project Express
 
 `grep` for 'TODO' to find some unfinished stuff

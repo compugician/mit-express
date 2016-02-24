@@ -24,12 +24,11 @@ DynamixelMotor motor3(interface, 3);
 
 //
 void setup() {
-  Serial.begin(9600);
+  Serial.begin(115200);
 
   //clearpath init
   pinMode(dirpin, OUTPUT);
   pinMode(steppin, OUTPUT);
-//  pinMode(SERIAL_DIRECTION, OUTPUT);
   pinMode(enable, OUTPUT);
   digitalWrite(enable, HIGH);
   delay(100);
@@ -37,45 +36,27 @@ void setup() {
   //dynamixel init
   interface.begin(57142);
   delay(100);
+
+  initializeMotor(motor1, cwlimit1, ccwlimit1);
+  initializeMotor(motor2, cwlimit2, ccwlimit2);
+  initializeMotor(motor3, cwlimit3, ccwlimit3);
   
-  motor1.init();
-  motor1.enableTorque();
-  motor1.speed(speed);
-  motor1.jointMode(cwlimit1, ccwlimit1);
-  
-  for (int i = 0; i < 3; i++) {
-    motor1.led(true);
-    delay(200);
-    motor1.led(false);
-    delay(200);
-  }
-  
-  motor2.init();
-  motor2.enableTorque();
-  motor2.speed(speed);
-  motor2.jointMode(cwlimit2, ccwlimit2);
-  
-  for (int i = 0; i < 3; i++) {
-    motor2.led(true);
-    delay(200);
-    motor2.led(false);
-    delay(200);
-  }
-  
-  motor3.init();
-  motor3.enableTorque();
-  motor3.speed(speed);
-  motor3.jointMode(cwlimit3, ccwlimit3);
-  
-  for (int i = 0; i < 3; i++) {
-    motor3.led(true);
-    delay(200);
-    motor3.led(false);
-    delay(200);
-  }
-  
-  delay(1000);
+  delay(350);
   Serial.println("Ready!");
+}
+
+void initializeMotor(DynamixelMotor motor, int cwlimit, int ccwlimit){
+  motor.init();
+  motor.enableTorque();
+  motor.speed(speed);
+  motor.jointMode(cwlimit, ccwlimit);
+  
+  for (int i = 0; i < 2; i++) {
+    motor.led(true);
+    delay(100);
+    motor.led(false);
+    delay(100);
+  }
 }
 
 // dynamixel functions
@@ -116,26 +97,42 @@ void loop() {
   }
 
   while (Serial.available() > 0) {
+    Serial.print("Delta: ");
+    long delta = millis() - lastReceivedAt;
+    Serial.print(delta);
     lastReceivedAt = millis();
     // parse out values
-    int x = Serial.parseInt();
-    int y = Serial.parseInt();
-    int colorIdx = Serial.parseInt();
-    int flow = Serial.parseInt();
-
-    if (Serial.read() == '\n') {
-//    dynamixel signals
-      motor1.led(true);
-      delay(10);
-      colorSelect(colorIdx);
-      delay(10);
-      paintEnable(flow > 0); // in case it was off, turn it on before flow
-      delay(10);
-      flowSet(flow);
-      delay(10);
-      paintEnable(flow > 0); // if it was on, turn it off after flow
-      delay(10);
-      motor1.led(false);
-    }
+    if (Serial.read()!='^') {
+      flushSerial();
+    } else {
+      int x = Serial.parseInt();
+      int y = Serial.parseInt();
+      int colorIdx = Serial.parseInt();
+      int flow = Serial.parseInt();
+      Serial.println(flow);
+  
+      if (Serial.read() == '\n') {
+  //    dynamixel signals
+        colorSelect(colorIdx);
+        delay(10);
+        paintEnable(flow > 0); // in case it was off, turn it on before flow
+        delay(10);
+        flowSet(flow);
+        delay(10);
+        paintEnable(flow > 0); // if it was on, turn it off after flow
+      } else {
+        flushSerial();
+      } 
+    } 
   }
 }
+
+int flushSerial() {
+  int c = 0;
+  while (Serial.available() >0) {
+    Serial.read();
+    c++;
+  }
+  return c;
+}
+

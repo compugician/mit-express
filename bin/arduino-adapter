@@ -17,7 +17,8 @@ var serial = new serialport.SerialPort("COM5", {
 });
 
 var serial2 = new serialport.SerialPort("COM6", {
-	baudrate: 115200,
+	baudrate: 9600,
+	parser: serialport.parsers.readline("\n")
 });
 
 var socket = io('http://localhost:3000');
@@ -27,6 +28,10 @@ var timeSinceLastSend = Date.now(), timeSinceLastSend2 = Date.now();
 
 serial.on("data", function (data) {
 	console.log("A:"+data);
+});
+
+serial2.on("data", function (data) {
+	console.log("B:"+data);
 });
 
 serial.on("open", function () {
@@ -87,12 +92,12 @@ serial2.on("open", function () {
 	console.log('serial opened');
 
 	socket.on('point-client', function (data) {
-		var x = Math.floor(data.x)
+		var x = Math.floor(data.x * 5.5);
 		
 		// 70ms gives the servos enough time to update (arduino requires 50 ms delay)
 		if (Date.now() - timeSinceLastSend2 > 200) {
-			console.log(x + "\n");
-			serial2.write(x + "\n");
+			console.log("^" + x + "\n");
+			serial2.write("^" + x + "\n");
 			
 			timeSinceLastSend2 = Date.now();
 		}

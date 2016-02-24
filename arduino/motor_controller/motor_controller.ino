@@ -99,7 +99,7 @@ void loop() {
   while (Serial.available() > 0) {
     Serial.print("Delta: ");
     long delta = millis() - lastReceivedAt;
-    Serial.print(delta);
+    Serial.println(delta);
     lastReceivedAt = millis();
     // parse out values
     if (Serial.read()!='^') {

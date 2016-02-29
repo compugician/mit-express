@@ -4,8 +4,11 @@
 var socket = io();
 
 socket.on('point-client', function (data) {
-  // console.log(data);
   queue.push(data);
+});
+
+socket.on('config-client', function (data) {
+  console.log(data);
 });
 
 // canvas script

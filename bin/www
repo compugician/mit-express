@@ -56,17 +56,20 @@ function isEquivalent(a, b) {
  */
 var io = require('socket.io')(server);
 io.on('connection', function (socket) {
-  console.log("client connected: " + socket.id);
+	console.log("client connected: " + socket.id);
 
-  var lastData = {};
-  socket.on('point', function (data) {
-    // TODO parse it into a js object
-    // store it into a DB, whatever else you gotta do
-    if (!isEquivalent(lastData, data)) {
-      socket.broadcast.emit('point-client', data); // see main.js
-    }
-    lastData = data;
-  });
+	var lastData = {};
+	socket.on('point', function (data) {
+		if (!isEquivalent(lastData, data)) {
+		  socket.broadcast.emit('point-client', data); // see main.js
+		}
+		lastData = data;
+	});
+	
+	
+	socket.on('config', function (data) {
+		socket.broadcast.emit('config-client', data); // see main.js
+	});
 });
 
 /**

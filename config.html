@@ -18,7 +18,7 @@
 <script type="text/javascript">
 
 // socket io
-var socket = io.connect('http://localhost:4000/');
+//var socket = io.connect('http://localhost:4000/');
 
 var graph = new joint.dia.Graph;
 var paper = new joint.dia.Paper({ 
@@ -30,6 +30,7 @@ var paper = new joint.dia.Paper({
 	defaultLink: new joint.dia.Link({
         attrs: { '.marker-target': { d: 'M 10 0 L 0 5 L 10 10 z' } }
     }),
+	linkPinning: false,
     validateConnection: function(sourceView, sourceMagnet, targetView, targetMagnet) {
         return sourceMagnet != targetMagnet;
     },
@@ -79,23 +80,38 @@ graph.on('change:source change:target', function(link) {
     var targetPort = link.get('target').port;
     var targetId = link.get('target').id;
 	
-	//TODO: socket stuff still in progress
-	socket.emit('config', {
-		sourcePort : link.get('source').port,
-		sourceId : link.get('source').id,
-		targetPort : link.get('target').port,
-		targetId : link.get('target').id
-		});
+	if (sourcePort == undefined){
+		link.remove();
+	}
+	
 	var m = [
         'The port <b>' + sourcePort,
         '</b> of element with ID <b>' + sourceId,
         '</b> is connected to port <b>' + targetPort,
         '</b> of elemnt with ID <b>' + targetId + '</b>'
     ].join('');
-	console.log(m)
+	
+	//TODO: socket stuff still in progress
+	/*
+	socket.emit('config', {
+		sourcePort : link.get('source').port,
+		sourceId : link.get('source').id,
+		targetPort : link.get('target').port,
+		targetId : link.get('target').id
+		});
+	
+	*/
+	if (targetPort != undefined){
+		console.log(m)
+	}
 
 });
 
+graph.on('remove', function(cell, collection, opt) {
+   if (cell.isLink() && cell.get('target').port != undefined) {
+		console.log("deleted: " + cell.get('target').port); 
+   }
+})
 
 
 </script>

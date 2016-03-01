@@ -40,37 +40,36 @@ var paper = new joint.dia.Paper({
     
 });
 
-var m1 = new joint.shapes.devs.Model({
-    position: { x: 50, y: 50 },
+var colorID = new joint.shapes.devs.Model({
+    position: { x: 400, y: 50 },
     size: { width: 90, height: 90 },
     inPorts: ['increase','decrease'],
     outPorts: ['out'],
     attrs: {
         '.label': { text: 'Color ID', 'ref-x': .5, 'ref-y': .2 },
+		'.name': "ColorID",
         rect: { fill: '#2ECC71' },
         '.inPorts circle': { fill: '#16A085', magnet: 'passive', type: 'input' },
         '.outPorts circle': { fill: '#E74C3C', type: 'output' }
-    },
-	name: 'colorID'
+    }
 });
-graph.addCell(m1);
+graph.addCell(colorID);
 
 var mouse = new joint.shapes.devs.Model({
     position: { x: 100, y: 50 },
     size: { width: 90, height: 200 },
-    outPorts: ['left click', 'right click', 'middle click', 'scroll wheel'],
+    outPorts: ['left click', 'middle click', 'right click', 'scroll wheel', 'x', 'y'],
     attrs: {
         '.label': { text: 'Mouse', 'ref-x': .4, 'ref-y': .45 },
         rect: { fill: '#2ECC71' },
         '.inPorts circle': { fill: '#16A085', magnet: 'passive', type: 'input' },
         '.outPorts circle': { fill: '#E74C3C', type: 'output' }
-    }, 
-	name: 'mouse'
+    }
 });
 graph.addCell(mouse);
 
 // rounded edges
-_.each([m1, mouse], function(element) {
+_.each([colorID, mouse], function(element) {
     element.attr({ '.body': { 'rx': 6, 'ry': 6 }});
 });
 
@@ -79,7 +78,6 @@ graph.on('change:source change:target', function(link) {
     var sourceId = link.get('source').id;
     var targetPort = link.get('target').port;
     var targetId = link.get('target').id;
-	
 	var m = [
         'The port <b>' + sourcePort,
         '</b> of element with ID <b>' + sourceId,
@@ -93,27 +91,31 @@ graph.on('change:source change:target', function(link) {
 			sourceId : link.get('source').id,
 			targetPort : link.get('target').port,
 			targetId : link.get('target').id,
+			targetName : link.getTargetElement().attr('.name'),
 			deleted : false
 		});
+		link.get('target').name = link.getTargetElement().attr('.name');
+		console.log(link.get('target'));
 		console.log(m)
 	}
 
 });
 
 graph.on('remove', function(cell, collection, opt) {
-   if (cell.isLink() && cell.get('target').port != undefined) {
+	console.log(cell.get('target'));
+   if (cell.isLink()) {
 		link = cell
 		socket.emit('config', {
 			sourcePort : link.get('source').port,
 			sourceId : link.get('source').id,
 			targetPort : link.get('target').port,
 			targetId : link.get('target').id,
+			targetName : link.get('target').name,
 			deleted : true
 		});
-		
-		console.log("deleted: " + cell.get('target').port); 
+		//console.log("deleted: " + cell.get('target').port); 
    }
-})
+});
 
 
 </script>

@@ -23,21 +23,32 @@ function setup() {
   flow = 0;
   colorIdx = 0;
 }
+
+socket.on('config-client', function (data) {
+	console.log(data);
+
+	if (data.deleted && data.targetName == 'ColorID'){
+		console.log("we'd do something here");
+	}
+});
+
 function draw() {
-  socket.emit('point', {
-    x: mouseX + 8,
-    y: mouseY + 8,
-    dotDiameter: dotDiameter,
-    color: {
-      r: r,
-      g: g,
-      b: b,
-      a: 255*flow/100
-    },
-    colorIdx: colorIdx,
-    flow: flow
-  });
+	
+	socket.emit('point', {
+		x: mouseX + 8,
+		y: mouseY + 8,
+		dotDiameter: dotDiameter,
+		color: {
+			r: r,
+			g: g,
+			b: b,
+			a: 255*flow/100
+		},
+		colorIdx: colorIdx,
+		flow: flow
+	});
 }
+
 function mousePressed() {
   dotDiameter = Math.random() * 15 + 10;
   r = Math.random() * 156 + 100;

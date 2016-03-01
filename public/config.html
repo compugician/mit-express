@@ -40,25 +40,25 @@ var paper = new joint.dia.Paper({
     
 });
 
-var colorID = new joint.shapes.devs.Model({
+var airbrushPos = new joint.shapes.devs.Model({
     position: { x: 400, y: 50 },
     size: { width: 90, height: 90 },
-    inPorts: ['increase','decrease'],
+    inPorts: ['x','y'],
     outPorts: ['out'],
     attrs: {
-        '.label': { text: 'Color ID', 'ref-x': .5, 'ref-y': .2 },
-		'.name': "ColorID",
+        '.label': { text: 'Airbrush\n Pos', 'ref-x': .5, 'ref-y': .2 },
+		'.name': "airbrushPos",
         rect: { fill: '#2ECC71' },
         '.inPorts circle': { fill: '#16A085', magnet: 'passive', type: 'input' },
         '.outPorts circle': { fill: '#E74C3C', type: 'output' }
     }
 });
-graph.addCell(colorID);
+graph.addCell(airbrushPos);
 
 var mouse = new joint.shapes.devs.Model({
     position: { x: 100, y: 50 },
     size: { width: 90, height: 200 },
-    outPorts: ['left click', 'middle click', 'right click', 'scroll wheel', 'x', 'y'],
+    outPorts: ['mouse_x', 'mouse_y'],
     attrs: {
         '.label': { text: 'Mouse', 'ref-x': .4, 'ref-y': .45 },
         rect: { fill: '#2ECC71' },
@@ -69,7 +69,7 @@ var mouse = new joint.shapes.devs.Model({
 graph.addCell(mouse);
 
 // rounded edges
-_.each([colorID, mouse], function(element) {
+_.each([airbrushPos, mouse], function(element) {
     element.attr({ '.body': { 'rx': 6, 'ry': 6 }});
 });
 
@@ -102,7 +102,6 @@ graph.on('change:source change:target', function(link) {
 });
 
 graph.on('remove', function(cell, collection, opt) {
-	console.log(cell.get('target'));
    if (cell.isLink()) {
 		link = cell
 		socket.emit('config', {
@@ -113,7 +112,6 @@ graph.on('remove', function(cell, collection, opt) {
 			targetName : link.get('target').name,
 			deleted : true
 		});
-		//console.log("deleted: " + cell.get('target').port); 
    }
 });
 

@@ -11,6 +11,14 @@ html, body {
 // socket io
 var socket = io.connect('http://localhost:3000/');
 var dotDiameter, r, g, b, flow, colorIdx;
+
+var lastData;
+var map_to_port = { 'airbrushPos' : [getMouseX, getMouseY] };
+var map_source_to_fn = { 
+	'mouse_x' : getMouseX,
+	'mouse_y' : getMouseY
+	};
+
 // canvas script
 function setup() {
   createCanvas(window.innerWidth, window.innerHeight);
@@ -27,16 +35,27 @@ function setup() {
 socket.on('config-client', function (data) {
 	console.log(data);
 
-	if (data.deleted && data.targetName == 'ColorID'){
-		console.log("we'd do something here");
+	if (data.deleted && data.targetName == 'airbrushPos'){
+		if (data.targetPort == 'x'){
+			map_to_port['airbrushPos'][0] = nop;
+		} else {
+			map_to_port['airbrushPos'][1] = nop;
+		}
+	}
+	else if (!data.deleted && data.targetName == 'airbrushPos'){
+		if (data.targetPort == 'x'){
+			map_to_port['airbrushPos'][0] = map_source_to_fn[data.sourcePort];
+		} else {
+			map_to_port['airbrushPos'][1] = map_source_to_fn[data.sourcePort];
+		}
 	}
 });
 
 function draw() {
-	
+	// TODO: save the last emit, so on the link removal we can freeze the state of that var
 	socket.emit('point', {
-		x: mouseX + 8,
-		y: mouseY + 8,
+		x: map_to_port['airbrushPos'][0](),
+		y: map_to_port['airbrushPos'][1](),
 		dotDiameter: dotDiameter,
 		color: {
 			r: r,
@@ -72,4 +91,15 @@ function keyPressed() {
   }
   return true;
 }
+
+// -----------------------------------------------------------------------------------
+function getMouseX(){
+	return mouseX + 8;
+}
+
+function getMouseY(){
+	return mouseY + 8;
+}
+
+function nop(){return 0;};
 </script>

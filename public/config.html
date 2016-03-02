@@ -40,6 +40,7 @@ var paper = new joint.dia.Paper({
     
 });
 
+// TODO add a field that tells the client the range of values that can be expected
 var airbrushPos = new joint.shapes.devs.Model({
     position: { x: 400, y: 50 },
     size: { width: 90, height: 90 },
@@ -57,7 +58,7 @@ graph.addCell(airbrushPos);
 
 var mouse = new joint.shapes.devs.Model({
     position: { x: 100, y: 50 },
-    size: { width: 90, height: 200 },
+    size: { width: 90, height: 90 },
     outPorts: ['mouse_x', 'mouse_y'],
     attrs: {
         '.label': { text: 'Mouse', 'ref-x': .4, 'ref-y': .45 },
@@ -68,8 +69,22 @@ var mouse = new joint.shapes.devs.Model({
 });
 graph.addCell(mouse);
 
+var numkeys = new joint.shapes.devs.Model({
+    position: { x: 100, y: 150 },
+    size: { width: 90, height: 90 },
+    outPorts: ['key'],
+    attrs: {
+        '.label': { text: 'Number\nKeys', 'ref-x': .4, 'ref-y': .35 },
+        rect: { fill: '#2ECC71' },
+		'.range': { start: 0, end: 9 },
+        '.inPorts circle': { fill: '#16A085', magnet: 'passive', type: 'input' },
+        '.outPorts circle': { fill: '#E74C3C', type: 'output' }
+    }
+});
+graph.addCell(numkeys);
+
 // rounded edges
-_.each([airbrushPos, mouse], function(element) {
+_.each([airbrushPos, mouse, numkeys], function(element) {
     element.attr({ '.body': { 'rx': 6, 'ry': 6 }});
 });
 

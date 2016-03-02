@@ -12,7 +12,22 @@ html, body {
 var socket = io.connect('http://localhost:3000/');
 var dotDiameter, r, g, b, flow, colorIdx;
 
-var lastData;
+var data = {
+		x: 0,
+		y: 0,
+		dotDiameter: 0,
+		color: {
+			r: 0,
+			g: 0,
+			b: 0,
+			a: 0
+		},
+		colorIdx: 0,
+		flow: 0
+	};
+
+
+
 var map_to_port = { 'airbrushPos' : [getMouseX, getMouseY] };
 var map_source_to_fn = { 
 	'mouse_x' : getMouseX,
@@ -33,13 +48,12 @@ function setup() {
 }
 
 socket.on('config-client', function (data) {
-	console.log(data);
 
 	if (data.deleted && data.targetName == 'airbrushPos'){
 		if (data.targetPort == 'x'){
-			map_to_port['airbrushPos'][0] = nop;
+			map_to_port['airbrushPos'][0] = data.x;
 		} else {
-			map_to_port['airbrushPos'][1] = nop;
+			map_to_port['airbrushPos'][1] = data.y;
 		}
 	}
 	else if (!data.deleted && data.targetName == 'airbrushPos'){
@@ -49,13 +63,17 @@ socket.on('config-client', function (data) {
 			map_to_port['airbrushPos'][1] = map_source_to_fn[data.sourcePort];
 		}
 	}
+	
+	console.log(map_to_port);
 });
 
 function draw() {
-	// TODO: save the last emit, so on the link removal we can freeze the state of that var
+	data.x = isFunction(map_to_port['airbrushPos'][0]) ? map_to_port['airbrushPos'][0]() : data.x;
+	data.y = isFunction(map_to_port['airbrushPos'][1]) ? map_to_port['airbrushPos'][1]() : data.y;
+	
 	socket.emit('point', {
-		x: map_to_port['airbrushPos'][0](),
-		y: map_to_port['airbrushPos'][1](),
+		x: data.x,
+		y: data.y,
 		dotDiameter: dotDiameter,
 		color: {
 			r: r,
@@ -102,4 +120,9 @@ function getMouseY(){
 }
 
 function nop(){return 0;};
+
+function isFunction(functionToCheck) {
+	var getType = {};
+	return functionToCheck && getType.toString.call(functionToCheck) === '[object Function]';
+}
 </script>

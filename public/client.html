@@ -11,6 +11,8 @@ html, body {
 // socket io
 var socket = io.connect('http://localhost:3000/');
 var dotDiameter, r, g, b, flow, colorIdx;
+var lastNumKeyPressed;
+var arrowCount = { up: 0, down: 0, left: 0, right: 0 };
 
 var data = {
 		x: 0,
@@ -28,10 +30,19 @@ var data = {
 
 
 
-var map_to_port = { 'airbrushPos' : [getMouseX, getMouseY] };
+var map_to_port = { 
+	'airbrushPos' : [getMouseX, getMouseY],
+	'colorID'	  : [getLastNumKey]
+	};
+	
 var map_source_to_fn = { 
 	'mouse_x' : getMouseX,
-	'mouse_y' : getMouseY
+	'mouse_y' : getMouseY,
+	'key'	  : getLastNumKey,
+	'up'	  : partial(getArrowCount, 'up'),
+	'down'	  : partial(getArrowCount, 'down'),
+	'left'	  : partial(getArrowCount, 'left'),
+	'right'	  : partial(getArrowCount, 'right')
 	};
 
 // canvas script
@@ -48,19 +59,33 @@ function setup() {
 }
 
 socket.on('config-client', function (data) {
-
-	if (data.deleted && data.targetName == 'airbrushPos'){
-		if (data.targetPort == 'x'){
-			map_to_port['airbrushPos'][0] = data.x;
-		} else {
-			map_to_port['airbrushPos'][1] = data.y;
+	if (data.deleted){
+		switch(data.targetName){
+			case('airbrushPos'):
+				if (data.targetPort == 'x'){
+					map_to_port['airbrushPos'][0] = data.x;
+				} else {
+					map_to_port['airbrushPos'][1] = data.y;
+				}
+				break;
+			case('colorID'):
+				map_to_port['colorID'] = data.colorIdx;
+				break;
+		// .. can put other stuff here later
 		}
 	}
-	else if (!data.deleted && data.targetName == 'airbrushPos'){
-		if (data.targetPort == 'x'){
-			map_to_port['airbrushPos'][0] = map_source_to_fn[data.sourcePort];
-		} else {
-			map_to_port['airbrushPos'][1] = map_source_to_fn[data.sourcePort];
+	else{
+		switch(data.targetName){
+			case('airbrushPos'):
+				if (data.targetPort == 'x'){
+					map_to_port['airbrushPos'][0] = map_source_to_fn[data.sourcePort];
+				} else {
+					map_to_port['airbrushPos'][1] = map_source_to_fn[data.sourcePort];
+				}
+				break;
+			case('colorID'):
+				map_to_port['colorID'] = map_source_to_fn[data.sourcePort];
+				break;
 		}
 	}
 	
@@ -70,6 +95,7 @@ socket.on('config-client', function (data) {
 function draw() {
 	data.x = isFunction(map_to_port['airbrushPos'][0]) ? map_to_port['airbrushPos'][0]() : data.x;
 	data.y = isFunction(map_to_port['airbrushPos'][1]) ? map_to_port['airbrushPos'][1]() : data.y;
+	data.colorIdx = isFunction(map_to_port['colorID']) ? map_to_port['colorID']() : data.colorIdx;
 	
 	socket.emit('point', {
 		x: data.x,
@@ -79,10 +105,10 @@ function draw() {
 			r: r,
 			g: g,
 			b: b,
-			a: 255*flow/100
+			a: 255//*flow/100
 		},
-		colorIdx: colorIdx,
-		flow: flow
+		colorIdx: data.colorIdx,
+		flow: 50//flow
 	});
 }
 
@@ -93,21 +119,30 @@ function mousePressed() {
   b = Math.random() * 156 + 100;
 }
 function keyPressed() {
-  if (keyCode === UP_ARROW) {
-    flow+=10;
-    if (flow > 100) flow = 100;
-    return false;
-  }
-  if (keyCode === DOWN_ARROW) {
-    flow-=10;
-    if (flow < 0) flow = 0;
-    return false;
-  }
-  if (parseInt(key) || key === '0') {
-    colorIdx = parseInt(key) * 2;
-    return false;
-  }
-  return true;
+	if (keyCode === UP_ARROW) {
+		arrowCount['up'] += 1;
+		//flow+=10;
+		//if (flow > 100) flow = 100;
+		return false;
+	}
+	if (keyCode === DOWN_ARROW) {
+		arrowCount['down'] += 1;
+		//flow-=10;
+		//if (flow < 0) flow = 0;
+		return false;
+	}
+	if (keyCode == LEFT_ARROW) {
+		arrowCount['left'] += 1;
+	}
+	if (keyCode == RIGHT_ARROW) {
+		arrowCount['right'] += 1;
+	}
+	if (parseInt(key) || key === '0') {
+		lastNumKeyPressed = parseInt(key);
+		colorIdx = parseInt(key) * 2;
+		return false;
+	}
+	return true;
 }
 
 // -----------------------------------------------------------------------------------
@@ -119,10 +154,24 @@ function getMouseY(){
 	return mouseY + 8;
 }
 
-function nop(){return 0;};
+function getLastNumKey(){
+	return lastNumKeyPressed;
+}
 
+function getArrowCount(key){
+	console.log(arrowCount);
+	return arrowCount[key];
+}
 function isFunction(functionToCheck) {
 	var getType = {};
 	return functionToCheck && getType.toString.call(functionToCheck) === '[object Function]';
+}
+
+function partial(func /*, 0..n args */) {
+  var args = Array.prototype.slice.call(arguments).splice(1);
+  return function() {
+    var allArguments = args.concat(Array.prototype.slice.call(arguments));
+    return func.apply(this, allArguments);
+  };
 }
 </script>

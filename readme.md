@@ -12,6 +12,7 @@ Node server, socket.io/serial adapter, and arduino sketches for Project Express
   * The server is now running at `localhost:3000`
   * `/` serves the dot drawing page for the projector (scripts for this page live in `public/javascripts/main.js`)
   * `/client.html` is a mouse/tablet input page that sends mouse position, etc to the server over socket.io
+  * `/config.html` is the configuration gui that allows different inputs to be connected to and control the various airbrush properties
 * Start the serial adapter: `node bin/arduino-adapter`
   * The serial port name is currently hardcode it, change it to what the Arduino is connected to
   * It will establish a socket connection to the server and a serial connection to Arduino

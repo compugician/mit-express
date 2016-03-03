@@ -9,12 +9,25 @@ html, body {
 <script type="text/javascript">
 'use strict';
 // socket io
+// TODO: investigate puredata
 var socket = io.connect('http://localhost:3000/');
 var dotDiameter, r, g, b, flow, colorIdx;
-var lastNumKeyPressed;
+var lastNumKeyPressed = 0;
 var arrowCount = { up: 0, down: 0, left: 0, right: 0 };
 
-var data = {
+var colors = {
+		red 	: { r : 255, g : 0, b : 0 },
+		orange	: { r : 255, g : 127, b : 0 },
+		yellow 	: { r : 255, g : 255, b : 0 },
+		green	: { r : 0, g : 255, b : 0 },
+		blue	: { r : 0, g : 0, b : 255 },
+		purple	: { r : 139, g : 0, b : 255 },
+		black	: { r : 0, g : 0, b : 0 },
+		brown	: { r : 165, g : 42, b : 42 }
+	};
+
+var colorList = ['red', 'orange', 'yellow', 'green', 'blue', 'purple', 'black', 'brown'];
+var sentData = {
 		x: 0,
 		y: 0,
 		dotDiameter: 0,
@@ -28,11 +41,10 @@ var data = {
 		flow: 0
 	};
 
-
-
 var map_to_port = { 
 	'airbrushPos' : [getMouseX, getMouseY],
-	'colorID'	  : [getLastNumKey]
+	'colorID'	  : getLastNumKey,
+	'flow'		  : [partial(getArrowCount, 'up'), partial(getArrowCount, 'down'), 0]
 	};
 	
 var map_source_to_fn = { 
@@ -51,9 +63,9 @@ function setup() {
   noStroke();
   dotDiameter = Math.random() * 15 + 10;
   // TODO correlate this to the colorIdx
-  r = Math.random() * 156 + 100;
-  g = Math.random() * 156 + 100;
-  b = Math.random() * 156 + 100;
+  //r = Math.random() * 156 + 100;
+  //g = Math.random() * 156 + 100;
+  //b = Math.random() * 156 + 100;
   flow = 0;
   colorIdx = 0;
 }
@@ -63,13 +75,27 @@ socket.on('config-client', function (data) {
 		switch(data.targetName){
 			case('airbrushPos'):
 				if (data.targetPort == 'x'){
-					map_to_port['airbrushPos'][0] = data.x;
+					map_to_port['airbrushPos'][0] = sentData.x;
 				} else {
-					map_to_port['airbrushPos'][1] = data.y;
+					map_to_port['airbrushPos'][1] = sentData.y;
 				}
 				break;
 			case('colorID'):
-				map_to_port['colorID'] = data.colorIdx;
+				map_to_port['colorID'] = sentData.colorIdx;
+				break;
+			case('flow'):
+				switch(data.targetPort){
+					case('increase'):
+						map_to_port['flow'][0] = sentData.flow;
+						break;
+					case('decrease'):
+						map_to_port['flow'][1] = sentData.flow;
+						break;
+					//TODO: set
+					//case('set'):
+					//	map_to_port['flow'][2] = sentData.flow;
+					//	break;
+				}
 				break;
 		// .. can put other stuff here later
 		}
@@ -86,29 +112,44 @@ socket.on('config-client', function (data) {
 			case('colorID'):
 				map_to_port['colorID'] = map_source_to_fn[data.sourcePort];
 				break;
+			case('flow'):
+				switch(data.targetPort){
+					case('increase'):
+						map_to_port['flow'][0] = map_source_to_fn[data.sourcePort];
+						break;
+					case('decrease'):
+						map_to_port['flow'][1] = map_source_to_fn[data.sourcePort];
+						break;
+					//TODO: set
+					//case('set'):
+					//	map_to_port['flow'][2] = map_source_to_fn[data.sourcePort];
+					//	break;
+				}
+				break;
 		}
 	}
 	
-	console.log(map_to_port);
+	console.log(data)
 });
 
 function draw() {
-	data.x = isFunction(map_to_port['airbrushPos'][0]) ? map_to_port['airbrushPos'][0]() : data.x;
-	data.y = isFunction(map_to_port['airbrushPos'][1]) ? map_to_port['airbrushPos'][1]() : data.y;
-	data.colorIdx = isFunction(map_to_port['colorID']) ? map_to_port['colorID']() : data.colorIdx;
+	sentData.x = isFunction(map_to_port['airbrushPos'][0]) ? map_to_port['airbrushPos'][0]() : sentData.x;
+	sentData.y = isFunction(map_to_port['airbrushPos'][1]) ? map_to_port['airbrushPos'][1]() : sentData.y;
+	sentData.colorIdx = isFunction(map_to_port['colorID']) ? map_to_port['colorID']() : sentData.colorIdx;
+	sentData.flow = getFlow();
 	
 	socket.emit('point', {
-		x: data.x,
-		y: data.y,
+		x: sentData.x,
+		y: sentData.y,
 		dotDiameter: dotDiameter,
 		color: {
-			r: r,
-			g: g,
-			b: b,
-			a: 255//*flow/100
+			r: colors[colorList[sentData.colorIdx % 8]].r,
+			g: colors[colorList[sentData.colorIdx % 8]].g,
+			b: colors[colorList[sentData.colorIdx % 8]].b,
+			a: 255*(sentData.flow % 100)/100
 		},
-		colorIdx: data.colorIdx,
-		flow: 50//flow
+		colorIdx: sentData.colorIdx,
+		flow: sentData.flow
 	});
 }
 
@@ -159,12 +200,27 @@ function getLastNumKey(){
 }
 
 function getArrowCount(key){
-	console.log(arrowCount);
 	return arrowCount[key];
 }
 function isFunction(functionToCheck) {
 	var getType = {};
 	return functionToCheck && getType.toString.call(functionToCheck) === '[object Function]';
+}
+
+function getFlow() {
+	if (isFunction(map_to_port['flow'][0])){
+		if (isFunction(map_to_port['flow'][1])){
+			return map_to_port['flow'][0]() - map_to_port['flow'][1]();
+		} else {
+			return map_to_port['flow'][0]() - map_to_port['flow'][1];
+		}
+	} else {
+		if (isFunction(map_to_port['flow'][1])){
+			return map_to_port['flow'][0] - map_to_port['flow'][1]();
+		} else {
+			return sentData.flow;
+		}
+	}
 }
 
 function partial(func /*, 0..n args */) {

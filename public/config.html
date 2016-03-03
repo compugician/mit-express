@@ -42,7 +42,7 @@ var paper = new joint.dia.Paper({
 
 // TODO add a field that tells the client the range of values that can be expected
 var airbrushPos = new joint.shapes.devs.Model({
-    position: { x: 400, y: 75 },
+    position: { x: 400, y: 50 },
     size: { width: 90, height: 90 },
     inPorts: ['x','y'],
     //outPorts: ['out'],
@@ -57,7 +57,7 @@ var airbrushPos = new joint.shapes.devs.Model({
 graph.addCell(airbrushPos);
 
 var colorID = new joint.shapes.devs.Model({
-    position: { x: 400, y: 175 },
+    position: { x: 400, y: 150 },
     size: { width: 90, height: 90 },
     inPorts: ['in'],
     //outPorts: ['out'],
@@ -70,6 +70,21 @@ var colorID = new joint.shapes.devs.Model({
     }
 });
 graph.addCell(colorID);
+
+var flow = new joint.shapes.devs.Model({
+    position: { x: 400, y: 250 },
+    size: { width: 90, height: 90 },
+    inPorts: ['increase', 'decrease', 'set'],
+    //outPorts: ['out'],
+    attrs: {
+        '.label': { text: 'Flow', 'ref-x': .5, 'ref-y': .2 },
+		'.name': "flow",
+        rect: { fill: '#2ECC71' },
+        '.inPorts circle': { fill: '#16A085', magnet: 'passive', type: 'input' },
+        '.outPorts circle': { fill: '#E74C3C', type: 'output' }
+    }
+});
+graph.addCell(flow);
 
 var mouse = new joint.shapes.devs.Model({
     position: { x: 100, y: 50 },
@@ -112,7 +127,7 @@ var arrowKeys = new joint.shapes.devs.Model({
 graph.addCell(arrowKeys);
 
 // rounded edges
-_.each([airbrushPos, mouse, numkeys, arrowKeys, colorID], function(element) {
+_.each([airbrushPos, mouse, numkeys, arrowKeys, colorID, flow], function(element) {
     element.attr({ '.body': { 'rx': 6, 'ry': 6 }});
 });
 

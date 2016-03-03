@@ -23,7 +23,7 @@ function setup() {
 var pointBegin, point1, point2, pointEnd;
 function draw() {
   clear();
-  background('black');
+  background('white');
   
   // delete oldest points
   while (queue.length > tailLength) queue.shift();
@@ -33,10 +33,11 @@ function draw() {
     point1 = queue[queue.length - 1];
     noStroke();
 	
-	//create a white outline for the airbrush head. 
-	fill(255, 255, 255, 255);
-	ellipse(point1.x, point1.y, point1.dotDiameter*11/10, point1.dotDiameter*11/10);
+	//create a black outline for the airbrush head.
 	fill(0, 0, 0, 255);
+	ellipse(point1.x, point1.y, point1.dotDiameter*11/10, point1.dotDiameter*11/10);
+	fill(255, 255, 255, 255);
+
     ellipse(point1.x, point1.y, point1.dotDiameter, point1.dotDiameter);
 	
 	//fill based on fill opacity and color

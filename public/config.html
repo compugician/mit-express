@@ -20,6 +20,14 @@
 // socket io
 var socket = io.connect('http://localhost:3000/');
 
+var links = {
+		airbrush_x : 'mouse_x',
+		airbrush_y : 'mouse_y',
+		colorID	   : 'key',
+		flow_increase : 'up',
+		flow_decrease : 'down'
+	};
+
 var graph = new joint.dia.Graph;
 var paper = new joint.dia.Paper({ 
 	el: $('#paper'), 
@@ -40,7 +48,7 @@ var paper = new joint.dia.Paper({
     
 });
 
-// TODO add a field that tells the client the range of values that can be expected
+// inputs --------------------------------------------------------------------------------------
 var airbrushPos = new joint.shapes.devs.Model({
     position: { x: 400, y: 50 },
     size: { width: 90, height: 90 },
@@ -86,6 +94,7 @@ var flow = new joint.shapes.devs.Model({
 });
 graph.addCell(flow);
 
+// airbrush attributes ---------------------------------------------------------------------
 var mouse = new joint.shapes.devs.Model({
     position: { x: 100, y: 50 },
     size: { width: 90, height: 90 },
@@ -131,6 +140,17 @@ _.each([airbrushPos, mouse, numkeys, arrowKeys, colorID, flow], function(element
     element.attr({ '.body': { 'rx': 6, 'ry': 6 }});
 });
 
+// default links -----------------------------------------------------------------------------
+
+create_link(mouse.id, 'mouse_x', airbrushPos.id, 'x', 'airbrushPos');
+create_link(mouse.id, 'mouse_y', airbrushPos.id, 'y', 'airbrushPos');
+create_link(numkeys.id, 'key', colorID.id, 'in', 'colorID');
+
+create_link(arrowKeys.id, 'up', flow.id, 'increase', 'flow');
+create_link(arrowKeys.id, 'down', flow.id, 'decrease', 'flow');
+
+// -------------------------------------------------------------------------------------------
+  
 graph.on('change:source change:target', function(link) {
     var sourcePort = link.get('source').port;
     var sourceId = link.get('source').id;
@@ -144,17 +164,28 @@ graph.on('change:source change:target', function(link) {
     ].join('');
 	
 	if (targetPort != undefined && sourcePort != undefined){
-		socket.emit('config', {
-			sourcePort : link.get('source').port,
-			sourceId : link.get('source').id,
-			targetPort : link.get('target').port,
-			targetId : link.get('target').id,
-			targetName : link.getTargetElement().attr('.name'),
-			deleted : false
-		});
+		switch (link.getTargetElement().attr('.name')){
+			case ('airbrushPos'):
+				if (targetPort == 'x'){
+					links.airbrush_x = sourcePort;
+				} else {
+					links.airbrush_y = sourcePort;
+				}
+				break;
+			case ('flow'):
+				if (targetPort == 'increase'){
+					links.flow_increase = sourcePort;
+				} else {
+					links.flow_decrease = sourcePort;
+				}
+				break;
+			case ('colorID'):
+				links.colorID = sourcePort;
+		}
+		console.log(links);
+		socket.emit('config', links);
+
 		link.get('target').name = link.getTargetElement().attr('.name');
-		console.log(link.get('target'));
-		console.log(m)
 	}
 
 });
@@ -162,17 +193,43 @@ graph.on('change:source change:target', function(link) {
 graph.on('remove', function(cell, collection, opt) {
    if (cell.isLink()) {
 		link = cell
-		socket.emit('config', {
-			sourcePort : link.get('source').port,
-			sourceId : link.get('source').id,
-			targetPort : link.get('target').port,
-			targetId : link.get('target').id,
-			targetName : link.get('target').name,
-			deleted : true
-		});
+		switch (link.get('target').name){
+			case ('airbrushPos'):
+				if (link.get('target').port == 'x'){
+					links.airbrush_x = undefined;
+				} else {
+					links.airbrush_y = undefined;
+				}
+				break;
+			case ('flow'):
+				if (link.get('target').port == 'increase'){
+					links.flow_increase = undefined;
+				} else {
+					links.flow_decrease = undefined;
+				}
+				break;
+			case ('colorID'):
+				links.colorID = undefined;
+		}
+		socket.emit('config', links);
    }
 });
 
+function create_link(sourceID, sourcePort, targetID, targetPort, targetName){
+	var link = new joint.dia.Link({
+		attrs: { '.marker-target': { d: 'M 10 0 L 0 5 L 10 10 z' } },
+		source: {
+				id: sourceID,
+				port: sourcePort
+			},
+			target: {
+				id: targetID,
+				port: targetPort,
+				name: targetName
+			}
+		});
+	graph.addCell(link);
+}
 
 </script>
 </html>

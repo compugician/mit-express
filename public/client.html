@@ -27,6 +27,7 @@ var colors = {
 	};
 
 var colorList = ['red', 'orange', 'yellow', 'green', 'blue', 'purple', 'black', 'brown'];
+
 var sentData = {
 		x: 0,
 		y: 0,
@@ -62,80 +63,26 @@ function setup() {
   createCanvas(window.innerWidth, window.innerHeight);
   noStroke();
   dotDiameter = Math.random() * 15 + 10;
-  // TODO correlate this to the colorIdx
-  //r = Math.random() * 156 + 100;
-  //g = Math.random() * 156 + 100;
-  //b = Math.random() * 156 + 100;
   flow = 0;
   colorIdx = 0;
 }
+socket.emit('config-request');
 
-socket.on('config-client', function (data) {
-	if (data.deleted){
-		switch(data.targetName){
-			case('airbrushPos'):
-				if (data.targetPort == 'x'){
-					map_to_port['airbrushPos'][0] = sentData.x;
-				} else {
-					map_to_port['airbrushPos'][1] = sentData.y;
-				}
-				break;
-			case('colorID'):
-				map_to_port['colorID'] = sentData.colorIdx;
-				break;
-			case('flow'):
-				switch(data.targetPort){
-					case('increase'):
-						map_to_port['flow'][0] = sentData.flow;
-						break;
-					case('decrease'):
-						map_to_port['flow'][1] = sentData.flow;
-						break;
-					//TODO: set
-					//case('set'):
-					//	map_to_port['flow'][2] = sentData.flow;
-					//	break;
-				}
-				break;
-		// .. can put other stuff here later
-		}
-	}
-	else{
-		switch(data.targetName){
-			case('airbrushPos'):
-				if (data.targetPort == 'x'){
-					map_to_port['airbrushPos'][0] = map_source_to_fn[data.sourcePort];
-				} else {
-					map_to_port['airbrushPos'][1] = map_source_to_fn[data.sourcePort];
-				}
-				break;
-			case('colorID'):
-				map_to_port['colorID'] = map_source_to_fn[data.sourcePort];
-				break;
-			case('flow'):
-				switch(data.targetPort){
-					case('increase'):
-						map_to_port['flow'][0] = map_source_to_fn[data.sourcePort];
-						break;
-					case('decrease'):
-						map_to_port['flow'][1] = map_source_to_fn[data.sourcePort];
-						break;
-					//TODO: set
-					//case('set'):
-					//	map_to_port['flow'][2] = map_source_to_fn[data.sourcePort];
-					//	break;
-				}
-				break;
-		}
-	}
-	
-	console.log(data)
+socket.on('config-client', function (config) {
+	console.log(config.flow_increase);
+	map_to_port['airbrushPos'][0] = updateConfiguration(config.airbrush_x, 'airbrushPos', 'x');
+	map_to_port['airbrushPos'][1] = updateConfiguration(config.airbrush_y, 'airbrushPos', 'y');
+	map_to_port['colorID'] = updateConfiguration(config.colorID,'colorID');
+	map_to_port['flow'][0] = updateConfiguration(config.flow_increase, 'flow');
+	map_to_port['flow'][1] = updateConfiguration(config.flow_decrease, 'flow');
+
+	console.log(config);
 });
 
 function draw() {
 	sentData.x = isFunction(map_to_port['airbrushPos'][0]) ? map_to_port['airbrushPos'][0]() : sentData.x;
 	sentData.y = isFunction(map_to_port['airbrushPos'][1]) ? map_to_port['airbrushPos'][1]() : sentData.y;
-	sentData.colorIdx = isFunction(map_to_port['colorID']) ? map_to_port['colorID']() : sentData.colorIdx;
+	sentData.colorIdx = Math.floor(isFunction(map_to_port['colorID']) ? map_to_port['colorID']() : sentData.colorIdx) % 8;
 	sentData.flow = getFlow();
 	
 	socket.emit('point', {
@@ -155,21 +102,15 @@ function draw() {
 
 function mousePressed() {
   dotDiameter = Math.random() * 15 + 10;
-  r = Math.random() * 156 + 100;
-  g = Math.random() * 156 + 100;
-  b = Math.random() * 156 + 100;
 }
+
 function keyPressed() {
 	if (keyCode === UP_ARROW) {
 		arrowCount['up'] += 1;
-		//flow+=10;
-		//if (flow > 100) flow = 100;
 		return false;
 	}
 	if (keyCode === DOWN_ARROW) {
 		arrowCount['down'] += 1;
-		//flow-=10;
-		//if (flow < 0) flow = 0;
 		return false;
 	}
 	if (keyCode == LEFT_ARROW) {
@@ -207,6 +148,7 @@ function isFunction(functionToCheck) {
 	return functionToCheck && getType.toString.call(functionToCheck) === '[object Function]';
 }
 
+// TODO: buggy. fix. (no flow when flow_increase disconnected in config)
 function getFlow() {
 	if (isFunction(map_to_port['flow'][0])){
 		if (isFunction(map_to_port['flow'][1])){
@@ -229,5 +171,24 @@ function partial(func /*, 0..n args */) {
     var allArguments = args.concat(Array.prototype.slice.call(arguments));
     return func.apply(this, allArguments);
   };
+}
+
+function updateConfiguration(updatedElement, targetName, targetPort){
+	if (updatedElement == undefined) {
+		switch(targetName){
+			case('airbrushPos'):
+				if (targetPort == 'x'){
+					return sentData.x;
+				} else {
+					return sentData.y;
+				}
+			case('colorID'):
+				return sentData.colorIdx;
+			case('flow'):
+				return sentData.flow;
+		// .. can put other stuff here later
+		}
+	}
+	return map_source_to_fn[updatedElement]
 }
 </script>

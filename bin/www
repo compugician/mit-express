@@ -21,7 +21,7 @@ app.set('port', port);
 
 var server = http.createServer(app);
 
-var lastConfig = 'default';
+var lastConfig = 'config not yet received';
 
 // checks equivalence of objects by property values, not reference
 function isEquivalent(a, b) {

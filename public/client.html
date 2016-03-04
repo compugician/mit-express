@@ -66,17 +66,19 @@ function setup() {
   flow = 0;
   colorIdx = 0;
 }
+
+// request the configuration on loading
 socket.emit('config-request');
 
 socket.on('config-client', function (config) {
-	console.log(config.flow_increase);
+	if (config == 'config not yet received'){
+		return;
+	}
 	map_to_port['airbrushPos'][0] = updateConfiguration(config.airbrush_x, 'airbrushPos', 'x');
 	map_to_port['airbrushPos'][1] = updateConfiguration(config.airbrush_y, 'airbrushPos', 'y');
 	map_to_port['colorID'] = updateConfiguration(config.colorID,'colorID');
 	map_to_port['flow'][0] = updateConfiguration(config.flow_increase, 'flow');
 	map_to_port['flow'][1] = updateConfiguration(config.flow_decrease, 'flow');
-
-	console.log(config);
 });
 
 function draw() {
@@ -105,11 +107,11 @@ function mousePressed() {
 }
 
 function keyPressed() {
-	if (keyCode === UP_ARROW) {
+	if (keyCode == UP_ARROW) {
 		arrowCount['up'] += 1;
 		return false;
 	}
-	if (keyCode === DOWN_ARROW) {
+	if (keyCode == DOWN_ARROW) {
 		arrowCount['down'] += 1;
 		return false;
 	}
@@ -119,7 +121,7 @@ function keyPressed() {
 	if (keyCode == RIGHT_ARROW) {
 		arrowCount['right'] += 1;
 	}
-	if (parseInt(key) || key === '0') {
+	if (parseInt(key) || key == '0') {
 		lastNumKeyPressed = parseInt(key);
 		colorIdx = parseInt(key) * 2;
 		return false;

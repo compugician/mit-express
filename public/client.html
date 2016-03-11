@@ -14,6 +14,7 @@ var socket = io.connect('http://localhost:3000/');
 var dotDiameter, r, g, b, flow, colorIdx;
 var lastNumKeyPressed = 0;
 var arrowCount = { up: 0, down: 0, left: 0, right: 0 };
+var flowVars = {increase : "up", decrease: "down"};
 
 var colors = {
 		red 	: { r : 255, g : 0, b : 0 },
@@ -62,7 +63,7 @@ var map_source_to_fn = {
 function setup() {
   createCanvas(window.innerWidth, window.innerHeight);
   noStroke();
-  dotDiameter = Math.random() * 15 + 10;
+  dotDiameter = 20;//Math.random() * 15 + 10;
   flow = 0;
   colorIdx = 0;
 }
@@ -77,8 +78,10 @@ socket.on('config-client', function (config) {
 	map_to_port['airbrushPos'][0] = updateConfiguration(config.airbrush_x, 'airbrushPos', 'x');
 	map_to_port['airbrushPos'][1] = updateConfiguration(config.airbrush_y, 'airbrushPos', 'y');
 	map_to_port['colorID'] = updateConfiguration(config.colorID,'colorID');
-	map_to_port['flow'][0] = updateConfiguration(config.flow_increase, 'flow');
-	map_to_port['flow'][1] = updateConfiguration(config.flow_decrease, 'flow');
+	map_to_port['flow'][0] = updateConfiguration(config.flow_increase, 'flow', 'increase');
+	map_to_port['flow'][1] = updateConfiguration(config.flow_decrease, 'flow', 'decrease');
+	flowVars.increase = config.flow_increase;
+	flowVars.decrease = config.flow_decrease;
 });
 
 function draw() {
@@ -150,7 +153,6 @@ function isFunction(functionToCheck) {
 	return functionToCheck && getType.toString.call(functionToCheck) === '[object Function]';
 }
 
-// TODO: buggy. fix. (no flow when flow_increase disconnected in config)
 function getFlow() {
 	if (isFunction(map_to_port['flow'][0])){
 		if (isFunction(map_to_port['flow'][1])){
@@ -175,7 +177,28 @@ function partial(func /*, 0..n args */) {
   };
 }
 
+function setCounter(counterName, setVal){
+	switch(counterName){
+		case ("key"):
+			lastNumPressed = setVal;
+			break;
+		case ("up"):
+			arrowCount['up'] = setVal;
+			break;
+		case ("down"):
+			arrowCount['down'] = setVal;
+			break;
+		case ("left"):
+			arrowCount['left'] = setVal;
+			break;
+		case ("right"):
+			arrowCount['right'] = setVal;
+			break;
+	}
+}
+
 function updateConfiguration(updatedElement, targetName, targetPort){
+	console.log(targetPort + " target port");
 	if (updatedElement == undefined) {
 		switch(targetName){
 			case('airbrushPos'):
@@ -187,7 +210,14 @@ function updateConfiguration(updatedElement, targetName, targetPort){
 			case('colorID'):
 				return sentData.colorIdx;
 			case('flow'):
-				return sentData.flow;
+				if (targetPort == 'increase'){
+					setCounter(flowVars.decrease, 0);
+					return sentData.flow;
+
+				} else {
+					setCounter(flowVars.increase, sentData.flow);
+					return 0;
+				}
 		// .. can put other stuff here later
 		}
 	}

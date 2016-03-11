@@ -72,6 +72,7 @@ io.on('connection', function (socket) {
 	socket.on('config', function (data) {
 		socket.broadcast.emit('config-client', data); // see main.js
 		lastConfig = data;
+		
 	});
 	
 	socket.on('config-request', function () {

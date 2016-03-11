@@ -63,7 +63,7 @@ var map_source_to_fn = {
 function setup() {
   createCanvas(window.innerWidth, window.innerHeight);
   noStroke();
-  dotDiameter = 20;//Math.random() * 15 + 10;
+  dotDiameter = 20;
   flow = 0;
   colorIdx = 0;
 }
@@ -103,10 +103,6 @@ function draw() {
 		colorIdx: sentData.colorIdx,
 		flow: sentData.flow
 	});
-}
-
-function mousePressed() {
-  dotDiameter = Math.random() * 15 + 10;
 }
 
 function keyPressed() {
@@ -180,7 +176,7 @@ function partial(func /*, 0..n args */) {
 function setCounter(counterName, setVal){
 	switch(counterName){
 		case ("key"):
-			lastNumPressed = setVal;
+			lastNumKeyPressed = setVal;
 			break;
 		case ("up"):
 			arrowCount['up'] = setVal;

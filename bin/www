@@ -18,7 +18,6 @@ app.set('port', port);
 /**
  * Create HTTP server.
  */
-
 var server = http.createServer(app);
 
 var lastConfig = 'config not yet received';
@@ -76,7 +75,7 @@ io.on('connection', function (socket) {
 	});
 	
 	socket.on('config-request', function () {
-		socket.broadcast.emit('config-client', lastConfig); // see main.js
+		socket.emit('config-client', lastConfig); // see main.js
 	});
 });
 

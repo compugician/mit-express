@@ -72,6 +72,7 @@ function setup() {
 socket.emit('config-request');
 
 socket.on('config-client', function (config) {
+	console.log(config);
 	if (config == 'config not yet received'){
 		return;
 	}
@@ -98,7 +99,7 @@ function draw() {
 			r: colors[colorList[sentData.colorIdx % 8]].r,
 			g: colors[colorList[sentData.colorIdx % 8]].g,
 			b: colors[colorList[sentData.colorIdx % 8]].b,
-			a: 255*(sentData.flow % 100)/100
+			a: 255*(sentData.flow % 101)/100
 		},
 		colorIdx: sentData.colorIdx,
 		flow: sentData.flow
@@ -152,13 +153,13 @@ function isFunction(functionToCheck) {
 function getFlow() {
 	if (isFunction(map_to_port['flow'][0])){
 		if (isFunction(map_to_port['flow'][1])){
-			return map_to_port['flow'][0]() - map_to_port['flow'][1]();
+			return min(100, map_to_port['flow'][0]() - map_to_port['flow'][1]());
 		} else {
-			return map_to_port['flow'][0]() - map_to_port['flow'][1];
+			return min(100, map_to_port['flow'][0]() - map_to_port['flow'][1]);
 		}
 	} else {
 		if (isFunction(map_to_port['flow'][1])){
-			return map_to_port['flow'][0] - map_to_port['flow'][1]();
+			return min(100, map_to_port['flow'][0] - map_to_port['flow'][1]());
 		} else {
 			return sentData.flow;
 		}

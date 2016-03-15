@@ -208,6 +208,7 @@ function updateConfiguration(updatedElement, targetName, targetPort){
 				return sentData.colorIdx;
 			case('flow'):
 				if (targetPort == 'increase'){
+					setCounter(flowVars.increase, 0);
 					setCounter(flowVars.decrease, 0);
 					return sentData.flow;
 

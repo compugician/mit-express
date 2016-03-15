@@ -28,6 +28,8 @@ var links = {
 		flow_decrease : 'down'
 	};
 
+socket.emit("config", links);
+
 var graph = new joint.dia.Graph;
 var paper = new joint.dia.Paper({ 
 	el: $('#paper'), 

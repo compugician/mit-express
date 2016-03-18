@@ -22,8 +22,8 @@ var gantrySerial = new serialport.SerialPort("COM6", {
 
 var socket = io('http://localhost:3000');
 
-var lastData, line;
-var timeSinceLastSend = Date.now(), timeSinceLastSend2 = Date.now();
+var lastAirbrushData, line;
+var timeSinceLastAirbrushSend = Date.now(), timeSinceLastGantrySend = Date.now();
 
 airbrushSerial.on("data", function (data) {
 	console.log("A:" + data);
@@ -49,7 +49,7 @@ airbrushSerial.on("open", function () {
 		} while (dataQueue.join("\n").length >= 1024); //only retain the most recent 1024 bits of data
 
 		// 200ms gives the servos enough time to update (arduino requires 50 ms delay)
-		if (Date.now() - timeSinceLastSend > 200) {
+		if (Date.now() - timeSinceLastAirbrushSend > 200) {
 			console.log(nextData + "\n");
 			airbrushSerial.write(nextData + "\n", function(err, results) {
 				if (err) {
@@ -57,11 +57,11 @@ airbrushSerial.on("open", function () {
 				}
 			});
 			
-			timeSinceLastSend = Date.now();
+			timeSinceLastAirbrushSend = Date.now();
 			dataQueue = []
 		}
 		
-		lastData = data;
+		lastAirbrushData= data;
 	
 	});
 
@@ -92,18 +92,17 @@ gantrySerial.on("open", function () {
 	console.log('airbrushSerialopened');
 
 	socket.on('point-client', function (data) {
-		var x = Math.floor(data.x * 5.5); // 5.5 is the conversion factor from pixels to steps
+		var x = Math.floor(data.x); // assumes the data is already converted to steps
+		var y = Math.floor(data.y);
 		
 		// 70ms gives the servos enough time to update (arduino requires 50 ms delay)
-		if (Date.now() - timeSinceLastSend2 > 200) {
-			console.log("^" + x + "\n");
-			gantrySerial.write("^" + x + "\n");
+		if (Date.now() - timeSinceLastGantrySend > 200) {
+			console.log("^" + x + " " + y + "\n");
+			gantrySerial.write("^" + x + " " + y + "\n");
 			
-			timeSinceLastSend2 = Date.now();
+			timeSinceLastGantrySend = Date.now();
 		}
-		
-		lastData2 = data;
-	
+			
 	});
 
 	process.stdin.resume(); //so the program will not close instantly

@@ -50,7 +50,7 @@ var paper = new joint.dia.Paper({
     
 });
 
-// inputs --------------------------------------------------------------------------------------
+// airbrush attributes --------------------------------------------------------------------------------------
 var airbrushPos = new joint.shapes.devs.Model({
     position: { x: 400, y: 50 },
     size: { width: 90, height: 90 },
@@ -96,7 +96,9 @@ var flow = new joint.shapes.devs.Model({
 });
 graph.addCell(flow);
 
-// airbrush attributes ---------------------------------------------------------------------
+
+
+// inputs ---------------------------------------------------------------------
 var mouse = new joint.shapes.devs.Model({
     position: { x: 100, y: 50 },
     size: { width: 90, height: 90 },
@@ -137,8 +139,22 @@ var arrowKeys = new joint.shapes.devs.Model({
 });
 graph.addCell(arrowKeys);
 
+var customDevice = new joint.shapes.devs.Model({
+    position: { x: 100, y: 350 },
+    size: { width: 90, height: 90 },
+    outPorts: ['custom_x', 'custom_y'],
+    attrs: {
+        '.label': { text: 'custom', 'ref-x': .5, 'ref-y': .2 },
+		'.name': "custom",
+        rect: { fill: '#2ECC71' },
+        '.inPorts circle': { fill: '#16A085', magnet: 'passive', type: 'input' },
+        '.outPorts circle': { fill: '#E74C3C', type: 'output' }
+    }
+});
+graph.addCell(customDevice);
+
 // rounded edges
-_.each([airbrushPos, mouse, numkeys, arrowKeys, colorID, flow], function(element) {
+_.each([airbrushPos, mouse, numkeys, arrowKeys, colorID, flow, customDevice], function(element) {
     element.attr({ '.body': { 'rx': 6, 'ry': 6 }});
 });
 

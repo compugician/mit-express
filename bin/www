@@ -7,6 +7,7 @@
 var app = require('../app');
 var debug = require('debug')('project-express:server');
 var http = require('http');
+var PerspT = require('perspective-transform');
 
 /**
  * Get port from environment and store in Express.
@@ -55,12 +56,26 @@ function isEquivalent(a, b) {
 /**
  * Create Socket server
  */
+var perspT = undefined;
 var io = require('socket.io')(server);
 io.on('connection', function (socket) {
 	console.log("client connected: " + socket.id);
 
 	var lastData = {};
 	socket.on('point', function (data) {
+		//console.log("point: " + data.srcPt + " corners: " + data.srcCorners);
+		if (data.srcCorners != undefined && data.srcPt != undefined){
+			if (perspT == undefined){
+				// coord order: bottom left --> bottom right --> top right --> top left
+				// 10000 refers to the max number of steps for the gantry
+				perspT =  PerspT(data.srcCorners, [0, 0, 10000, 0, 10000, 10000, 0, 10000]);
+			}
+			transformedPoint = perspT.transform(data.srcPt[0], data.srcPt[1]);
+			// adjust the y coordinate so that we're in top-left origin space
+			transformedPoint[1] = 10000 - transformedPoint[1];
+			pt = { x : transformedPoint[0], y : transformedPoint[1] };
+			socket.broadcast.emit('custom-point-client', pt);
+		}
 		if (!isEquivalent(lastData, data)) {
 		  socket.broadcast.emit('point-client', data); // see main.js
 		}

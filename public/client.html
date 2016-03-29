@@ -141,11 +141,11 @@ function keyPressed() {
 
 // -----------------------------------------------------------------------------------
 function getMouseX(){
-	return mouseX + 8;
+	return Math.floor((mouseX + 8) * 5.5); // convert from pixels to steps
 }
 
 function getMouseY(){
-	return mouseY + 8;
+	return Math.floor((mouseY + 8) * 5.5); // convert from pixels to steps
 }
 
 function getLastNumKey(){

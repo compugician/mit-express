@@ -4,6 +4,9 @@
 var socket = io();
 
 socket.on('point-client', function (data) {
+	// convert coordinates from steps to pixels
+	data.x = Math.floor(data.x/5.5);
+	data.y = Math.floor(data.y/5.5);
   queue.push(data);
 });
 
@@ -32,7 +35,7 @@ function draw() {
   if (queue.length > 0) {
     point1 = queue[queue.length - 1];
     noStroke();
-	
+
 	//create a black outline for the airbrush head.
 	fill(0, 0, 0, 255);
 	ellipse(point1.x, point1.y, point1.dotDiameter*11/10, point1.dotDiameter*11/10);

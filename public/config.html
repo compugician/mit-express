@@ -202,7 +202,6 @@ graph.on('change:source change:target', function(link) {
 		}
 		console.log(links);
 		socket.emit('config', links);
-
 		link.get('target').name = link.getTargetElement().attr('.name');
 	}
 

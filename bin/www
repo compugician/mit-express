@@ -63,6 +63,13 @@ io.on('connection', function (socket) {
 
 	var lastData = {};
 	socket.on('point', function (data) {
+		if (!isEquivalent(lastData, data)) {
+		  socket.broadcast.emit('point-client', data); // see main.js
+		}
+		lastData = data;
+	});
+	
+	socket.on('custom-point', function (data) {
 		//console.log("point: " + data.srcPt + " corners: " + data.srcCorners);
 		if (data.srcCorners != undefined && data.srcPt != undefined){
 			if (perspT == undefined){
@@ -76,12 +83,7 @@ io.on('connection', function (socket) {
 			pt = { x : transformedPoint[0], y : transformedPoint[1] };
 			socket.broadcast.emit('custom-point-client', pt);
 		}
-		if (!isEquivalent(lastData, data)) {
-		  socket.broadcast.emit('point-client', data); // see main.js
-		}
-		lastData = data;
 	});
-	
 	
 	socket.on('config', function (data) {
 		socket.broadcast.emit('config-client', data); // see main.js

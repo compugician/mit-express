@@ -78,6 +78,7 @@ socket.emit('config-request');
 socket.on('custom-point-client', function (pt) {
 	customClientData.x = Math.max(0, Math.min(10000, pt.x));
 	customClientData.y = Math.max(0, Math.min(10000, pt.y));
+	console.log("recieved" + pt + " " + customClientData);
 });
 
 socket.on('config-client', function (config) {

@@ -3,8 +3,11 @@
 // socket io
 var socket = io();
 
+<<<<<<< HEAD
 const MAX_X = 620;
 const MAX_Y = 620;
+=======
+>>>>>>> 68eef1a9c0cabb16ebac3235322d5d9c6c56b4f8
 
 const TL_X = 290;
 const TL_Y = 37;
@@ -14,6 +17,7 @@ const BL_X = 321;
 const BL_Y = 738;
 const BR_X = 836;
 const BR_Y = 704;
+<<<<<<< HEAD
 const BOX_SIZE = 20;//TODO: get rid of this. use element width to find center.
 
 
@@ -39,6 +43,15 @@ socket.on('point-client', function (data) {
 
 
 
+=======
+const BOX_SIZE = 20;
+
+
+socket.on('point-client', function (data) {
+  // convert coordinates from steps to pixels
+  data.x = Math.floor(data.x/5.5);
+  data.y = Math.floor(data.y/5.5);
+>>>>>>> 68eef1a9c0cabb16ebac3235322d5d9c6c56b4f8
   queue.push(data);
 });
 

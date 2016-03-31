@@ -37,8 +37,6 @@ socket.on('point-client', function (data) {
 //  data.x = $("#topleft").offset().left+BOX_SIZE/2 + (data.x/MAX_X) * ($("#topright").offset().left - $("#topleft").offset().left - BOX_SIZE);
 //  data.y = $("#topleft").offset().top+BOX_SIZE/2 + (data.y/MAX_Y) * ($("#bottomleft").offset().top - $("#topleft").offset().top - BOX_SIZE);
 
-
-
   queue.push(data);
 });
 

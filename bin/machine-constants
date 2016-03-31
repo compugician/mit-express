@@ -1,7 +1,0 @@
-//Tal's Test Computer
-const GANTRY_PORT_NAME = "COM10";
-const AIRBRUSH_PORT_NAME = "COM13";
-
-//original settings
-//const GANTRY_PORT_NAME = "COM5";
-//const AIRBRUSH_PORT_NAME = "COM6";

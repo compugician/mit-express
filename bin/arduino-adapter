@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 
-require('machine-constants');
+var fs = require('fs');
+// file is included here:
+eval(fs.readFileSync('./machine-constants.js')+'');
 
 var serialport = require("serialport");
 var io = require('socket.io-client');

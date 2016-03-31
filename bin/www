@@ -80,8 +80,8 @@ io.on('connection', function (socket) {
 			transformedPoint = perspT.transform(data.srcPt[0], data.srcPt[1]);
 			// adjust the y coordinate so that we're in top-left origin space
 			transformedPoint[1] = 10000 - transformedPoint[1];
-			pt = { x : transformedPoint[0], y : transformedPoint[1] };
-			console.log(pt.x + " " + pt.y + " " + "\n" + data.srcCorners + "\n" + data.srcPt);
+			pt = { x : Math.round(transformedPoint[0]), y : Math.round(transformedPoint[1]) };
+			console.log(pt.x + " " + pt.y + " " + "\n" + data.srcCorners + "\n" + data.srcPt+ "\n");
 			socket.broadcast.emit('custom-point-client', pt);
 		}
 	});

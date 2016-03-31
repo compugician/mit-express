@@ -14,17 +14,30 @@ const BL_X = 321;
 const BL_Y = 738;
 const BR_X = 836;
 const BR_Y = 704;
-const BOX_SIZE = 20;
+const BOX_SIZE = 20;//TODO: get rid of this. use element width to find center.
 
 
 socket.on('point-client', function (data) {
-  // convert coordinates from steps to pixels
-  data.x = $("#topleft").offset().left+BOX_SIZE/2 + (data.x/MAX_X) * ($("#topright").offset().left - $("#topleft").offset().left - BOX_SIZE);
-  data.y = $("#topleft").offset().top+BOX_SIZE/2 + ((MAX_Y-data.y)/MAX_Y) * ($("#bottomleft").offset().top - $("#topleft").offset().top - BOX_SIZE);
+  var x1 = $("#topleft").offset().left+BOX_SIZE/2;
+  var y1 = $("#topleft").offset().top+BOX_SIZE/2;
+  var x2 = $("#topright").offset().left+BOX_SIZE/2;
+  var y2 = $("#topright").offset().top+BOX_SIZE/2;
+  var x3 = $("#bottomleft").offset().left+BOX_SIZE/2;
+  var y3 = $("#bottomleft").offset().top+BOX_SIZE/2;
+  var x4 = $("#bottomright").offset().left+BOX_SIZE/2;
+  var y4 = $("#bottomright").offset().top+BOX_SIZE/2;
+
+  var perspT = PerspT([0, 0, 10000, 0, 0, 10000, 10000, 10000], [x1, y1, x2, y2, x3, y3, x4, y4]);
+
+  var result = perspT.transform(data.x,data.y);
+
+  data.x = result[0];
+  data.y = result[1];
+
+//  data.x = $("#topleft").offset().left+BOX_SIZE/2 + (data.x/MAX_X) * ($("#topright").offset().left - $("#topleft").offset().left - BOX_SIZE);
+//  data.y = $("#topleft").offset().top+BOX_SIZE/2 + (data.y/MAX_Y) * ($("#bottomleft").offset().top - $("#topleft").offset().top - BOX_SIZE);
 
 
-  //TODO:
-  //var transform = PerspT([0, 0, w, 0, 0, h, w, h], [x1, y1, x2, y2, x3, y3, x4, y4]);
 
   queue.push(data);
 });
@@ -34,7 +47,7 @@ socket.on('config-client', function (data) {
 });
 
 // canvas script
-var tailLength = 10;
+var tailLength = 60;
 
 var queue = [];
 

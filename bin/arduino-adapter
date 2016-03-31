@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
+require('machine-constants');
+
 var serialport = require("serialport");
 var io = require('socket.io-client');
 var dataQueue = [] //FIFO
@@ -10,13 +12,13 @@ serialport.list(function (err, ports) {
 	});
 });
 
-var airbrushSerial = new serialport.SerialPort("COM5", {
+var airbrushSerial = new serialport.SerialPort(AIRBRUSH_PORT_NAME, {
 	baudrate: 115200,
 	parser: serialport.parsers.readline("\n")
 });
 
-var gantrySerial = new serialport.SerialPort("COM6", {
-	baudrate: 9600,
+var gantrySerial = new serialport.SerialPort(GANTRY_PORT_NAME, {
+	baudrate: 115200,
 	parser: serialport.parsers.readline("\n")
 });
 
@@ -89,16 +91,17 @@ airbrushSerial.on("open", function () {
 
 
 gantrySerial.on("open", function () {
-	console.log('airbrushSerialopened');
+	console.log('gantrySerialopened');
 
 	socket.on('point-client', function (data) {
-		var x = Math.floor(data.x); // assumes the data is already converted to steps
-		var y = Math.floor(data.y);
+		var x = Math.floor(data.x/10000 * 620); // assumes the data is already converted to steps
+		var y = 620-Math.floor(data.y/10000 * 620);
 		
 		// 70ms gives the servos enough time to update (arduino requires 50 ms delay)
 		if (Date.now() - timeSinceLastGantrySend > 200) {
-			console.log("^" + x + " " + y + "\n");
-			gantrySerial.write("^" + x + " " + y + "\n");
+			var gcode = "G01 X" + x + " Y" + y + " F50000\n"
+			console.log("G->"+gcode);
+			gantrySerial.write(gcode);
 			
 			timeSinceLastGantrySend = Date.now();
 		}

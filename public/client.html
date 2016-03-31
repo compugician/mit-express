@@ -1,6 +1,20 @@
+<html>
+<head>
+
 <style>
 html, body {
   overflow: hidden;
+}
+
+.gantryControl {
+	border-color:black;
+	border-width: 2px;
+	border-style: dashed;
+	width:620px;
+	height:620px;
+	position:absolute;
+	left:100px;
+
 }
 </style>
 <script src="http://cdnjs.cloudflare.com/ajax/libs/p5.js/0.4.21/p5.js"></script>
@@ -141,11 +155,17 @@ function keyPressed() {
 
 // -----------------------------------------------------------------------------------
 function getMouseX(){
-	return Math.floor((mouseX + 8) * 5.5); // convert from pixels to steps
+	var left = document.getElementById("gantryControl").offsetLeft;
+	var x =  Math.max(0,Math.min(mouseX-left,620));
+	return (x/620)*10000;
+//	return Math.floor((mouseX + 8)); // convert from pixels to steps
 }
 
 function getMouseY(){
-	return Math.floor((mouseY + 8) * 5.5); // convert from pixels to steps
+	var top = document.getElementById("gantryControl").offsetTop;
+	var y = Math.max(0,Math.min(mouseY-top,620));
+	return (y/620)*10000;
+//	return Math.floor((mouseY + 8)); // convert from pixels to steps
 }
 
 function getLastNumKey(){
@@ -233,3 +253,15 @@ function updateConfiguration(updatedElement, targetName, targetPort){
 }
 
 </script>
+</head>
+<body>
+
+<h1>
+Project Express
+</h1>
+
+<div id="gantryControl" class="gantryControl">
+	
+</div>
+</body>
+</html>

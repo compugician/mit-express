@@ -3,8 +3,16 @@
 // socket io
 var socket = io();
 
+<<<<<<< HEAD
 const MAX_X = 620;
 const MAX_Y = 620;
+=======
+<<<<<<< HEAD
+const MAX_X = 620;
+const MAX_Y = 620;
+=======
+>>>>>>> 68eef1a9c0cabb16ebac3235322d5d9c6c56b4f8
+>>>>>>> f1c03eb2e75fd971d3ba918151df771e3ac83332
 
 const TL_X = 290;
 const TL_Y = 37;

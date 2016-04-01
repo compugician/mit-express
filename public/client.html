@@ -128,6 +128,10 @@ socket.on('msg-sent-to-gantry', function(msg){
 	document.getElementById("sentToGantry").value = msg;
 });
 
+socket.on('received-from-gantry', function(msg){
+	document.getElementById("receivedFromGantry").value = msg;
+});
+
 
 socket.on('custom-point-client', function (pt) {
 	console.log("received: " + pt.x + " " + pt.y);
@@ -314,7 +318,8 @@ Send
 
 <textarea readonly id="sentToGantry" rows="4" cols="50" placeholder="Messages sent to gantry will appear here.">
 </textarea>
-
+<textarea readonly id="receivedFromGantry" rows="4" cols="50" placeholder="Messages received from gantry will appear here.">
+</textarea>
 </div>
 </body>
 </html>

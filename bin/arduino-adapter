@@ -97,7 +97,8 @@ var lastGantryData = {x:0,y:0};
 gantrySerial.on("open", function () {
 	console.log('gantrySerialopened');
 	//10000
-
+	var lastGantryMsgSent = "";
+	
 	socket.on('point-client', function (data) {
 		var x = Math.floor(data.x/10000 * 620); // assumes the data is already converted to steps
 		var y = 620-Math.floor(data.y/10000 * 620);
@@ -115,8 +116,17 @@ gantrySerial.on("open", function () {
 			
 			timeSinceLastGantrySend = Date.now();
 			lastGantryData = {x: x, y: y};
+			lastGantryMsgSent = gcode;
+			socket.emit('msg-sent-to-gantry', lastGantryMsgSent);
 		}
 			
+	});
+	
+	socket.on('gcode-msg', function(gcode){
+		gantrySerial.write(gcode);
+		console.log("wrote from client.html: " + gcode);
+		lastGantryMsgSent = gcode;
+		socket.emit('msg-sent-to-gantry', lastGantryMsgSent); // 
 	});
 
 	process.stdin.resume(); //so the program will not close instantly

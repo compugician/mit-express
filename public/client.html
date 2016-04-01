@@ -16,6 +16,29 @@ html, body {
 	left:100px;
 
 }
+
+.debuggingTools {
+	border-color:black;
+	border-width: 2px;
+	width:400px;
+	height:620px;
+	position:absolute;
+	left:820px;
+}
+
+.sendButton {
+    background-color: #4CAF50;
+    color: black;
+    border: 2px solid #4CAF50;
+	float:right;
+}
+
+.sendButton:active {
+    background-color: white;
+    color: black;
+    border: 2px solid #4CAF50;
+	float:right;
+}
 </style>
 <script src="http://cdnjs.cloudflare.com/ajax/libs/p5.js/0.4.21/p5.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.7/socket.io.min.js"></script>
@@ -29,6 +52,8 @@ var dotDiameter, r, g, b, flow, colorIdx;
 var lastNumKeyPressed = 0;
 var arrowCount = { up: 0, down: 0, left: 0, right: 0 };
 var flowVars = {increase : "up", decrease: "down"};
+
+
 
 var colors = {
 		red 	: { r : 255, g : 0, b : 0 },
@@ -79,15 +104,30 @@ var map_source_to_fn = {
 
 // canvas script
 function setup() {
-  createCanvas(window.innerWidth, window.innerHeight);
-  noStroke();
-  dotDiameter = 20;
-  flow = 0;
-  colorIdx = 0;
+	createCanvas(window.innerWidth, window.innerHeight);
+	// debug elements
+	var sendButton = document.getElementById("sendButton");
+	var debugConsole = document.getElementById("debugConsole");
+	
+	sendButton.onclick = function(){
+							// add a newline for the end of gcode command
+							socket.emit('gcode-msg', debugConsole.value + "\n");
+							console.log(debugConsole.value);
+							debugConsole.value = "";
+						};
+	noStroke();
+	dotDiameter = 20;
+	flow = 0;
+	colorIdx = 0;
 }
 
 // request the configuration on loading
 socket.emit('config-request');
+
+socket.on('msg-sent-to-gantry', function(msg){
+	document.getElementById("sentToGantry").value = msg;
+});
+
 
 socket.on('custom-point-client', function (pt) {
 	console.log("received: " + pt.x + " " + pt.y);
@@ -263,7 +303,18 @@ Project Express
 </h1>
 
 <div id="gantryControl" class="gantryControl">
-	
+</div>
+
+<div id="debuggingTools" class="debuggingTools">
+<textarea id="debugConsole" rows="4" cols="50" placeholder="Enter gcode command and click 'Send' to send. Newlines are automatically added">
+</textarea>
+<button id="sendButton" class="sendButton">
+Send
+</button>
+
+<textarea readonly id="sentToGantry" rows="4" cols="50" placeholder="Messages sent to gantry will appear here.">
+</textarea>
+
 </div>
 </body>
 </html>

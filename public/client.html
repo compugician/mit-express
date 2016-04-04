@@ -212,6 +212,10 @@ function keyPressed() {
 		}
 		return;
 	}
+	// only update values if we're hovering in the box
+	if (!okayToSendData){
+		return;
+	}
 	
 	if (keyCode == UP_ARROW) {
 		arrowCount['up'] += 1;

@@ -66,7 +66,7 @@ var dotDiameter, r, g, b, flow, colorIdx;
 var lastNumKeyPressed = 0;
 var arrowCount = { up: 0, down: 0, left: 0, right: 0 };
 var flowVars = {increase : "up", decrease: "down"};
-
+var okayToSendData = false;
 
 
 var colors = {
@@ -117,18 +117,23 @@ var map_source_to_fn = {
 	'custom_y' 	: function(){ return customClientData.y == undefined ? sentData.y : customClientData.y; }
 	};
 
+function sendMsg(){
+	var debugConsole = document.getElementById("debugConsole");
+	// add a newline for the end of gcode command
+	socket.emit('gcode-msg', debugConsole.value + "\n");
+	console.log(debugConsole.value);
+	debugConsole.value = "";
+}
 // canvas script
 function setup() {
 	createCanvas(window.innerWidth, window.innerHeight);
 	// debug elements
-	var sendButton = document.getElementById("sendButton");
-	var debugConsole = document.getElementById("debugConsole");
-	sendButton.onclick = function(){
-							// add a newline for the end of gcode command
-							socket.emit('gcode-msg', debugConsole.value + "\n");
-							console.log(debugConsole.value);
-							debugConsole.value = "";
-						};
+	document.getElementById("sendButton").onclick = sendMsg;
+	
+	var gantryControl = document.getElementById("gantryControl");
+	// only send messages when mouse is within dashed box
+	gantryControl.onmouseleave = function(){ okayToSendData = false; };
+	gantryControl.onmouseenter = function(){ okayToSendData = true; };
 	noStroke();
 	dotDiameter = 20;
 	flow = 0;
@@ -174,6 +179,9 @@ socket.on('config-client', function (config) {
 });
 
 function draw() {
+	if (!okayToSendData){
+		return;
+	}
 	sentData.x = isFunction(map_to_port['airbrushPos'][0]) ? map_to_port['airbrushPos'][0]() : sentData.x;
 	sentData.y = isFunction(map_to_port['airbrushPos'][1]) ? map_to_port['airbrushPos'][1]() : sentData.y;
 	sentData.colorIdx = Math.floor(isFunction(map_to_port['colorID']) ? map_to_port['colorID']() : sentData.colorIdx) % 8;
@@ -197,6 +205,10 @@ function draw() {
 function keyPressed() {
 	// if we're typing in the console, don't want to be changing airbrush properties
 	if (document.activeElement.id == "debugConsole"){
+		if (keyCode == 13){ // pressed enter
+			sendMsg();
+			return false;
+		}
 		return;
 	}
 	

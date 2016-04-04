@@ -178,6 +178,11 @@ function draw() {
 }
 
 function keyPressed() {
+	// if we're typing in the console, don't want to be changing airbrush properties
+	if (document.activeElement.id == "debugConsole"){
+		return;
+	}
+	
 	if (keyCode == UP_ARROW) {
 		arrowCount['up'] += 1;
 		return false;
@@ -192,11 +197,13 @@ function keyPressed() {
 	if (keyCode == RIGHT_ARROW) {
 		arrowCount['right'] += 1;
 	}
+	
 	if (parseInt(key) || key == '0') {
 		lastNumKeyPressed = parseInt(key);
 		colorIdx = parseInt(key) * 2;
 		return false;
 	}
+	
 	return true;
 }
 

@@ -68,6 +68,18 @@ io.on('connection', function (socket) {
 		}
 		lastData = data;
 	});
+
+  socket.on('gcode-msg', function (data) {
+    socket.broadcast.emit('gcode-msg', data); // see main.js
+  });
+
+  socket.on('msg-sent-to-gantry', function (data) {
+    socket.broadcast.emit('msg-sent-to-gantry', data); // see main.js
+  });
+
+  socket.on('received-from-gantry', function (data) {
+    socket.broadcast.emit('received-from-gantry', data); // see main.js
+  });
 	
 	socket.on('custom-point', function (data) {
 		//console.log("point: " + data.srcPt + " corners: " + data.srcCorners);

@@ -109,7 +109,6 @@ function setup() {
 	// debug elements
 	var sendButton = document.getElementById("sendButton");
 	var debugConsole = document.getElementById("debugConsole");
-	
 	sendButton.onclick = function(){
 							// add a newline for the end of gcode command
 							socket.emit('gcode-msg', debugConsole.value + "\n");
@@ -126,11 +125,15 @@ function setup() {
 socket.emit('config-request');
 
 socket.on('msg-sent-to-gantry', function(msg){
-	document.getElementById("sentToGantry").value = msg;
+	var msgsSent = document.getElementById("sentToGantry");
+	msgsSent.value += msg;
+	msgsSent.scrollTop = msgsSent.scrollHeight;
 });
 
 socket.on('received-from-gantry', function(msg){
-	document.getElementById("receivedFromGantry").value = msg;
+	var msgsReceived = document.getElementById("receivedFromGantry");
+	msgsReceived.value += msg;
+	msgsReceived.scrollTop = msgsReceived.scrollHeight;
 });
 
 

@@ -156,6 +156,18 @@ socket.on('received-from-gantry', function(msg){
 	msgsReceived.scrollTop = msgsReceived.scrollHeight;
 });
 
+socket.on('sent-to-airbrush', function(msg){
+	var msgsReceived = document.getElementById("airbrushMsgLog");
+	msgsReceived.value += "sent: " + msg;
+	msgsReceived.scrollTop = msgsReceived.scrollHeight;
+});
+
+socket.on('received-from-airbrush', function(msg){
+	var msgsReceived = document.getElementById("airbrushMsgLog");
+	msgsReceived.value += "received: " + msg;
+	msgsReceived.scrollTop = msgsReceived.scrollHeight;
+});
+
 
 socket.on('custom-point-client', function (pt) {
 	console.log("received: " + pt.x + " " + pt.y);
@@ -353,13 +365,16 @@ Project Express
 
 <div id="debuggingTools" class="debuggingTools">
 <h2> Debugging Interface </h2>
-<textarea id="debugConsole" class="gantryMsgLog" rows="4" cols="50" placeholder="Enter gcode command and click 'Send' to send. Newlines are automatically added">
+<textarea id="debugConsole" class="gantryMsgLog" rows="4" cols="50" placeholder="Enter gcode command and click 'Send' or press Enter to send. Newlines are automatically added">
 </textarea>
 <button id="sendButton" class="sendButton">
 Send
 </button>
 
 <textarea readonly id="gantryMsgLog" class="gantryMsgLog" rows="4" cols="50" placeholder="Messages sent to/ received from gantry will appear here.">
+</textarea>
+
+<textarea readonly id="airbrushMsgLog" class="gantryMsgLog" rows="4" cols="50" placeholder="Messages sent to/ received from airbrush will appear here.">
 </textarea>
 
 </div>

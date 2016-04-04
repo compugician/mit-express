@@ -33,6 +33,7 @@ var timeSinceLastAirbrushSend = Date.now(), timeSinceLastGantrySend = Date.now()
 
 airbrushSerial.on("data", function (data) {
 	console.log("A:" + data);
+	socket.emit("received-from-airbrush", data);
 });
 
 gantrySerial.on("data", function (data) {
@@ -63,7 +64,7 @@ airbrushSerial.on("open", function () {
 				  console.error('err ' + err);
 				}
 			});
-			
+			socket.emit('sent-to-airbrush', nextData);
 			timeSinceLastAirbrushSend = Date.now();
 			dataQueue = []
 		}

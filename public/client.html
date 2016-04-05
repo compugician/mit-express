@@ -125,11 +125,30 @@ function sendMsg(){
 	console.log(debugConsole.value);
 	debugConsole.value = "";
 }
+
+function cleanBrush() {
+	socket.emit('point', {
+		x: sentData.x,
+		y: sentData.y,
+		dotDiameter: dotDiameter,
+		color: {
+			r: 255,
+			g: 255,
+			b: 255,
+			a: 128
+		},
+		colorIdx: 8,
+		flow: 100
+	});
+}
+
 // canvas script
 function setup() {
 	createCanvas(window.innerWidth, window.innerHeight);
 	// debug elements
 	document.getElementById("sendButton").onclick = sendMsg;
+
+	document.getElementById("cleanButton").onclick = cleanBrush;
 	
 	var gantryControl = document.getElementById("gantryControl");
 	// only send messages when mouse is within dashed box
@@ -158,13 +177,13 @@ socket.on('received-from-gantry', function(msg){
 
 socket.on('sent-to-airbrush', function(msg){
 	var msgsReceived = document.getElementById("airbrushMsgLog");
-	msgsReceived.value += "sent: " + msg;
+	msgsReceived.value += "sent: " + msg + "\n";
 	msgsReceived.scrollTop = msgsReceived.scrollHeight;
 });
 
 socket.on('received-from-airbrush', function(msg){
 	var msgsReceived = document.getElementById("airbrushMsgLog");
-	msgsReceived.value += "received: " + msg;
+	msgsReceived.value += "received: " + msg + "\n";
 	msgsReceived.scrollTop = msgsReceived.scrollHeight;
 });
 
@@ -376,6 +395,11 @@ Send
 
 <textarea readonly id="airbrushMsgLog" class="gantryMsgLog" rows="4" cols="50" placeholder="Messages sent to/ received from airbrush will appear here.">
 </textarea>
+
+<button id="cleanButton" class="cleanButton">
+Clean
+</button>
+
 
 </div>
 </body>

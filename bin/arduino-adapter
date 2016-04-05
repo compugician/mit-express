@@ -33,12 +33,12 @@ var timeSinceLastAirbrushSend = Date.now(), timeSinceLastGantrySend = Date.now()
 
 airbrushSerial.on("data", function (data) {
 	console.log("A:" + data);
-	socket.emit("received-from-airbrush", data);
+	//socket.emit("received-from-airbrush", data);
 });
 
 gantrySerial.on("data", function (data) {
 	console.log("B:" + data);
-	socket.emit("received-from-gantry", data);
+	//socket.emit("received-from-gantry", data);
 });
 
 
@@ -64,7 +64,7 @@ airbrushSerial.on("open", function () {
 				  console.error('err ' + err);
 				}
 			});
-			socket.emit('sent-to-airbrush', nextData);
+			//socket.emit('sent-to-airbrush', nextData);
 			timeSinceLastAirbrushSend = Date.now();
 			dataQueue = []
 		}
@@ -121,7 +121,7 @@ gantrySerial.on("open", function () {
 			timeSinceLastGantrySend = Date.now();
 			lastGantryData = {x: x, y: y};
 			lastGantryMsgSent = gcode;
-			socket.emit('msg-sent-to-gantry', lastGantryMsgSent);
+			//socket.emit('msg-sent-to-gantry', lastGantryMsgSent);
 		}
 			
 	});
@@ -130,7 +130,7 @@ gantrySerial.on("open", function () {
 		gantrySerial.write(gcode);
 		console.log("wrote from client.html: " + gcode);
 		lastGantryMsgSent = gcode;
-		socket.emit('msg-sent-to-gantry', lastGantryMsgSent); // 
+		//socket.emit('msg-sent-to-gantry', lastGantryMsgSent); // 
 	});
 
 	process.stdin.resume(); //so the program will not close instantly

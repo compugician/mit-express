@@ -88,6 +88,14 @@ io.on('connection', function (socket) {
   socket.on('received-from-airbrush', function (data) {
     socket.broadcast.emit('received-from-airbrush', data); // see main.js
   });
+
+  socket.on('gantry-pos-request', function(){
+    socket.emit('gantry-pos-request');
+  });
+
+  socket.on('gantry-pos-reply', function(data){
+    socket.emit('gantry-pos-reply', data);
+  });
 	
 	socket.on('custom-point', function (data) {
 		//console.log("point: " + data.srcPt + " corners: " + data.srcCorners);

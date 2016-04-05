@@ -38,6 +38,9 @@ airbrushSerial.on("data", function (data) {
 
 gantrySerial.on("data", function (data) {
 	console.log("B:" + data);
+	if (data.charAt(0) == "<"){
+		socket.emit('gantry-pos-reply', data);
+	}
 	//socket.emit("received-from-gantry", data);
 });
 
@@ -131,6 +134,10 @@ gantrySerial.on("open", function () {
 		console.log("wrote from client.html: " + gcode);
 		lastGantryMsgSent = gcode;
 		//socket.emit('msg-sent-to-gantry', lastGantryMsgSent); // 
+	});
+
+	socket.on('gantry-pos-request', function(){
+		gantrySerial.write("?");
 	});
 
 	process.stdin.resume(); //so the program will not close instantly

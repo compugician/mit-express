@@ -33,6 +33,7 @@ socket.on('point-client', function (data) {
 
 //  data.x = $("#topleft").offset().left+BOX_SIZE/2 + (data.x/MAX_X) * ($("#topright").offset().left - $("#topleft").offset().left - BOX_SIZE);
 //  data.y = $("#topleft").offset().top+BOX_SIZE/2 + (data.y/MAX_Y) * ($("#bottomleft").offset().top - $("#topleft").offset().top - BOX_SIZE);
+	socket.emit('gantry-pos-request'); // receive data about last line drawn
 
 	queue.push(data);
 });
@@ -41,10 +42,21 @@ socket.on('config-client', function (data) {
 	console.log(data);
 });
 
+socket.on('gantry-pos-reply', function(data){
+	readout = data.split(",");
+	for (i = 0; i < readout.length; i++){
+		if (readout[i].charAt(0) == "B") {
+			numberToKeepOnQueue = parseInt(readout[i].split(":")[1]);
+			break;
+		}
+	}
+});
+
 // canvas script
 var tailLength = 60;
 
 var queue = [];
+var numberToKeepOnQueue = -1;
 
 function setup() {
 	createCanvas(window.innerWidth, window.innerHeight);
@@ -85,7 +97,7 @@ function draw() {
 	background('black');
 
 	// delete oldest points
-	while (queue.length > tailLength) queue.shift();
+	while (numberToKeepOnQueue >= 0 && queue.length > numberToKeepOnQueue) queue.shift();
 
 	// always draw most recent point
 	if (queue.length > 0) {

@@ -33,8 +33,6 @@ socket.on('point-client', function (data) {
 
 //  data.x = $("#topleft").offset().left+BOX_SIZE/2 + (data.x/MAX_X) * ($("#topright").offset().left - $("#topleft").offset().left - BOX_SIZE);
 //  data.y = $("#topleft").offset().top+BOX_SIZE/2 + (data.y/MAX_Y) * ($("#bottomleft").offset().top - $("#topleft").offset().top - BOX_SIZE);
-	socket.emit('gantry-pos-request'); // receive data about last line drawn
-
 	queue.push(data);
 });
 
@@ -46,7 +44,7 @@ socket.on('gantry-pos-reply', function(data){
 	var readout = data.split(",");
 	for (var i = 0; i < readout.length; i++){
 		if (readout[i].charAt(0) == "B") {
-			numberToKeepOnQueue = parseInt(readout[i].split(":")[1]);
+			numberToKeepOnQueue = parseInt(readout[i].split(":")[1])*10;
 			console.log("num: " + numberToKeepOnQueue);
 			break;
 		}
@@ -92,32 +90,34 @@ function setup() {
 
 }
 
-var pointBegin, point1, point2, pointEnd;
+var pointBegin, point1, point2, pointEnd, lastPt;
 function draw() {
 	clear();
 	background('black');
+	socket.emit('gantry-pos-request'); // receive data about last line drawn
 
 	// delete oldest points
 	while (numberToKeepOnQueue >= 0 && queue.length > numberToKeepOnQueue) queue.shift();
 
 	// always draw most recent point
-	if (queue.length > 0) {
-	point1 = queue[queue.length - 1];
-	noStroke();
+	if (queue.length > 0 || lastPt != undefined) {
+		point1 = queue.length > 0 ? queue[queue.length - 1] : lastPt;
+		noStroke();
 
-	//create a black outline for the airbrush head.
-	fill(0, 0, 0, 255);
-	ellipse(point1.x, point1.y, point1.dotDiameter*11/10, point1.dotDiameter*11/10);
-	fill(255, 255, 255, 255);
+		//create a black outline for the airbrush head.
+		fill(0, 0, 0, 255);
+		ellipse(point1.x, point1.y, point1.dotDiameter*11/10, point1.dotDiameter*11/10);
+		fill(255, 255, 255, 255);
 
-	ellipse(point1.x, point1.y, point1.dotDiameter, point1.dotDiameter);
+		ellipse(point1.x, point1.y, point1.dotDiameter, point1.dotDiameter);
 
-	//fill based on fill opacity and color
-	fill(point1.color.r, point1.color.g, point1.color.b, point1.color.a);
-	ellipse(point1.x, point1.y, point1.dotDiameter, point1.dotDiameter);
-
+		//fill based on fill opacity and color
+		fill(point1.color.r, point1.color.g, point1.color.b, point1.color.a);
+		ellipse(point1.x, point1.y, point1.dotDiameter, point1.dotDiameter);
+		if (queue.length > 0){
+			lastPt = queue[queue.length - 1];
+		}
 	}
-
 	// draw point trail
 	noFill();
 	for (var i = 0; i < queue.length - 1; i++) {

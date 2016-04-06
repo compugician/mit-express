@@ -43,10 +43,11 @@ socket.on('config-client', function (data) {
 });
 
 socket.on('gantry-pos-reply', function(data){
-	readout = data.split(",");
-	for (i = 0; i < readout.length; i++){
+	var readout = data.split(",");
+	for (var i = 0; i < readout.length; i++){
 		if (readout[i].charAt(0) == "B") {
 			numberToKeepOnQueue = parseInt(readout[i].split(":")[1]);
+			console.log("num: " + numberToKeepOnQueue);
 			break;
 		}
 	}

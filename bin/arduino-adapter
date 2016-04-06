@@ -131,12 +131,11 @@ gantrySerial.on("open", function () {
 	
 	socket.on('gcode-msg', function(gcode){
 		gantrySerial.write(gcode);
-		console.log("wrote from client.html: " + gcode);
 		lastGantryMsgSent = gcode;
 		//socket.emit('msg-sent-to-gantry', lastGantryMsgSent); // 
 	});
 
-	socket.on('gantry-pos-request', function(){
+	socket.on('gantry-pos-request', function(data){
 		gantrySerial.write("?");
 	});
 

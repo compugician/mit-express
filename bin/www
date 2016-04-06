@@ -89,12 +89,12 @@ io.on('connection', function (socket) {
     socket.broadcast.emit('received-from-airbrush', data); // see main.js
   });
 
-  socket.on('gantry-pos-request', function(){
-    socket.emit('gantry-pos-request');
+  socket.on('gantry-pos-request', function(data){
+    socket.broadcast.emit('gantry-pos-request', data);
   });
 
   socket.on('gantry-pos-reply', function(data){
-    socket.emit('gantry-pos-reply', data);
+    socket.broadcast.emit('gantry-pos-reply', data);
   });
 	
 	socket.on('custom-point', function (data) {

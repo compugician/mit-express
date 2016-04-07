@@ -30,7 +30,7 @@ socket.on('point-client', function (data) {
 
 	data.x = result[0];
 	data.y = result[1];
-
+	lastLineNumSent = data.lineNum;
 //  data.x = $("#topleft").offset().left+BOX_SIZE/2 + (data.x/MAX_X) * ($("#topright").offset().left - $("#topleft").offset().left - BOX_SIZE);
 //  data.y = $("#topleft").offset().top+BOX_SIZE/2 + (data.y/MAX_Y) * ($("#bottomleft").offset().top - $("#topleft").offset().top - BOX_SIZE);
 	queue.push(data);
@@ -43,9 +43,16 @@ socket.on('config-client', function (data) {
 socket.on('gantry-pos-reply', function(data){
 	var readout = data.split(",");
 	for (var i = 0; i < readout.length; i++){
-		if (readout[i].charAt(0) == "B") {
-			numberToKeepOnQueue = parseInt(readout[i].split(":")[1])*10;
-			console.log("num: " + numberToKeepOnQueue);
+		if (readout[i].startsWith("Ln")) {
+			var lineNum = parseInt(readout[i].split(":")[1]);
+			const GANTRY_MAX_LINE_NUM = 99999;
+
+			if (lineNum != 0){
+				// handles the 99999 wraparound. Javascript's modulo will give the negative remainder,
+				// to we need Math.abs to fix. (eg. -1 % 2 = -1)
+				numberToKeepOnQueue = Math.abs((lastLineNumSent - lineNum) % GANTRY_MAX_LINE_NUM);
+			}
+			console.log("num: " + numberToKeepOnQueue + "lastLineNumSent: " + lastLineNumSent);
 			break;
 		}
 	}
@@ -56,6 +63,7 @@ var tailLength = 60;
 
 var queue = [];
 var numberToKeepOnQueue = -1;
+var lastLineNumSent = 0;
 
 function setup() {
 	createCanvas(window.innerWidth, window.innerHeight);

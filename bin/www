@@ -58,14 +58,18 @@ function isEquivalent(a, b) {
  */
 var perspT = undefined;
 var io = require('socket.io')(server);
+var lineNum = 0;
 io.on('connection', function (socket) {
 	console.log("client connected: " + socket.id);
 
 	var lastData = {};
+  const GANTRY_MAX_LINE_NUMBER = 99999;
 	socket.on('point', function (data) {
 		if (!isEquivalent(lastData, data)) {
+      data.lineNum = (lineNum++) % GANTRY_MAX_LINE_NUMBER;
 		  socket.broadcast.emit('point-client', data); // see main.js
 		}
+    delete data.lineNum;
 		lastData = data;
 	});
 

@@ -126,7 +126,11 @@ function sendMsg(){
 	debugConsole.value = "";
 }
 
-function cleanBrush() {
+const CLEAN_CYCLE_LENGTH = 5000;
+const CLEAN_CYCLE_DELAY = 201;
+function cleanBrush(count) {
+	if (undefined===count) {count=0;}
+	console.log("Cleaning:"+count);
 	socket.emit('point', {
 		x: sentData.x,
 		y: sentData.y,
@@ -138,8 +142,15 @@ function cleanBrush() {
 			a: 128
 		},
 		colorIdx: 8,
-		flow: 100
+		flow: (count%2==0)?100:99 //this is so each message is different than the previous...
 	});
+
+	if (count*CLEAN_CYCLE_DELAY>=CLEAN_CYCLE_LENGTH) {
+		console.log("Cleaning:Done");
+		return;
+	}
+
+	setTimeout(function() { cleanBrush(count+1); },CLEAN_CYCLE_DELAY);
 }
 
 // canvas script
@@ -148,7 +159,7 @@ function setup() {
 	// debug elements
 	document.getElementById("sendButton").onclick = sendMsg;
 
-	document.getElementById("cleanButton").onclick = cleanBrush;
+	document.getElementById("cleanButton").onclick = function() { cleanBrush(0); };
 	
 	var gantryControl = document.getElementById("gantryControl");
 	// only send messages when mouse is within dashed box
@@ -369,6 +380,35 @@ function updateConfiguration(updatedElement, targetName, targetPort){
 		}
 	}
 	return map_source_to_fn[updatedElement]
+}
+
+function isEquivalent(a, b) {
+  // Create arrays of property names
+  var aProps = Object.getOwnPropertyNames(a);
+  var bProps = Object.getOwnPropertyNames(b);
+
+  if (aProps.length != bProps.length) {
+    return false;
+  }
+
+  for (var i = 0; i < aProps.length; i++) {
+    var propName = aProps[i];
+    if (typeof a[propName] === 'object') {
+      if (typeof b[propName] === 'object') {
+        if (!isEquivalent(a[propName], b[propName])) {
+          return false;
+        }
+      }
+      else {
+        return false;
+      }
+    }
+    else if (a[propName] !== b[propName]) {
+      return false;
+    }
+  }
+
+  return true;
 }
 
 </script>

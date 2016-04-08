@@ -25,6 +25,11 @@ var lastConfig = 'config not yet received';
 
 // checks equivalence of objects by property values, not reference
 function isEquivalent(a, b) {
+  //adding because of null conversion error. Not sure 'false' is the right response here, but seems like a good default.
+  if (null==a || null==b) {
+    return false; 
+  }
+
   // Create arrays of property names
   var aProps = Object.getOwnPropertyNames(a);
   var bProps = Object.getOwnPropertyNames(b);

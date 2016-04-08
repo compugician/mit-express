@@ -182,6 +182,11 @@ socket.on('msg-sent-to-gantry', function(msg){
 	msgsSent.scrollTop = msgsSent.scrollHeight;
 });
 
+socket.on('gantry-pos-reply', function(msg) {
+	var paragraph = document.getElementById("gantryStatusLine");
+	paragraph.textContent = msg;
+});
+
 socket.on('received-from-gantry', function(msg){
 	var msgsReceived = document.getElementById("gantryMsgLog");
 	msgsReceived.value += "received: " + msg;
@@ -449,6 +454,7 @@ Send
 Clean
 </button>
 
+<p id="gantryStatusLine"/>
 
 </div>
 </body>

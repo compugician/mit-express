@@ -33,7 +33,7 @@ var timeSinceLastAirbrushSend = Date.now(), timeSinceLastGantrySend = Date.now()
 
 airbrushSerial.on("data", function (data) {
 	console.log("A:" + data);
-	//socket.emit("received-from-airbrush", data);
+	socket.emit("received-from-airbrush", data);
 });
 
 gantrySerial.on("data", function (data) {
@@ -41,8 +41,8 @@ gantrySerial.on("data", function (data) {
 		socket.emit('gantry-pos-reply', data);
 	} else {
 		console.log("B:" + data);
+		socket.emit("received-from-gantry", data);
 	}
-	//socket.emit("received-from-gantry", data);
 });
 
 
@@ -68,7 +68,7 @@ airbrushSerial.on("open", function () {
 				  console.error('err ' + err);
 				}
 			});
-			//socket.emit('sent-to-airbrush', nextData);
+			socket.emit('sent-to-airbrush', nextData);
 			timeSinceLastAirbrushSend = Date.now();
 			dataQueue = []
 		}
@@ -131,7 +131,7 @@ gantrySerial.on("open", function () {
 			timeSinceLastGantrySend = Date.now();
 			lastGantryData = {x: x, y: y};
 			lastGantryMsgSent = gcode;
-			//socket.emit('msg-sent-to-gantry', lastGantryMsgSent);
+			socket.emit('msg-sent-to-gantry', lastGantryMsgSent);
 		}
 			
 	});
@@ -139,7 +139,7 @@ gantrySerial.on("open", function () {
 	socket.on('gcode-msg', function(gcode){
 		gantrySerial.write(gcode);
 		lastGantryMsgSent = gcode;
-		//socket.emit('msg-sent-to-gantry', lastGantryMsgSent); // 
+		socket.emit('msg-sent-to-gantry', lastGantryMsgSent); // 
 	});
 
 	socket.on('gantry-pos-request', function(data){

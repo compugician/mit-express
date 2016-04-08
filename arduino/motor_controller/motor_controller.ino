@@ -1,5 +1,6 @@
-#include <SoftwareSerial.h>
 #include "DynamixelMotor.h"
+
+const String versionString = "0.5.0";
 
 // clearpath vars
 int scopePin = 13;
@@ -27,7 +28,7 @@ DynamixelMotor motor3(interface, 3);
 void setup() {
   Serial.begin(115200);
 
-  Serial.println("Starting...");
+  Serial.println("Starting... V"+versionString);
   
   pinMode(scopePin, OUTPUT);
   pinMode(timeoutSetPin, INPUT_PULLUP);

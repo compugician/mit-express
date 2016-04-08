@@ -1,6 +1,6 @@
 #include "DynamixelMotor.h"
 
-const String versionString = "0.5.0";
+const String versionString = "0.5.2";
 
 // clearpath vars
 int scopePin = 13;
@@ -13,10 +13,15 @@ int16_t motorSpeed=1023;//WAS 256
 
 DynamixelInterface &interface=*createSerialInterface(Serial1); // RX, TX
 
+//color
 int cwlimit1 = 28;
 int ccwlimit1 = 851;
+
+//air on/off
 int cwlimit2 = 920;
-int ccwlimit2 = 929;
+int ccwlimit2 = 930; //"on"
+
+//paint flow
 int cwlimit3 = 575;
 int ccwlimit3 = 1023;
 

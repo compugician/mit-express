@@ -118,7 +118,7 @@ gantrySerial.on("open", function () {
 		gcodeLineNum = data.lineNum;
 		// 70ms gives the servos enough time to update (arduino requires 50 ms delay)
 		// only move if the difference in point position from last send is > 5 pixels in some direction
-		console.log("Dx:"+dx+" Dy:"+dy);
+		//console.log("Dx:"+dx+" Dy:"+dy);
 		if ((Date.now() - timeSinceLastGantrySend > 200) && (dx > 5 || dy > 5)) {
 			var gcode = "G01 X" + x + " Y" + y + " F50000 N" + gcodeLineNum + "\n";
 			

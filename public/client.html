@@ -13,14 +13,14 @@ html, body {
 	width:620px;
 	height:620px;
 	position:absolute;
-	left:100px;
+	left:10px;
 }
 
 .debuggingTools {
 	border-color:black;
 	border-width: 2px;
 	position:absolute;
-	left:820px;
+	left:650px;
 	background-color: #D6D6D6;
 	border-radius: 5px;
 	font-family: sans-serif;
@@ -155,7 +155,8 @@ function cleanBrush(count) {
 
 // canvas script
 function setup() {
-	createCanvas(window.innerWidth, window.innerHeight);
+	createCanvas(620, 620);
+
 	// debug elements
 	document.getElementById("sendButton").onclick = sendMsg;
 
@@ -165,6 +166,7 @@ function setup() {
 	// only send messages when mouse is within dashed box
 	gantryControl.onmouseleave = function(){ okayToSendData = false; };
 	gantryControl.onmouseenter = function(){ okayToSendData = true; };
+	gantryControl.onmousemove = mouseMove;
 	noStroke();
 	dotDiameter = 20;
 	flow = 0;
@@ -284,18 +286,25 @@ function keyPressed() {
 }
 
 // -----------------------------------------------------------------------------------
-function getMouseX(){
+
+var gantryMouseX = 0;
+var gantryMouseY = 0;
+function mouseMove(event) {
 	var left = document.getElementById("gantryControl").offsetLeft;
-	var x =  Math.max(0,Math.min(mouseX-left,620));
-	return (x/620)*10000;
-//	return Math.floor((mouseX + 8)); // convert from pixels to steps
+	var top = document.getElementById("gantryControl").offsetTop;
+	var width =parseInt(window.getComputedStyle(document.getElementById("gantryControl")).width);
+	var height = parseInt(window.getComputedStyle(document.getElementById("gantryControl")).height);
+	gantryMouseX = Math.max(0,Math.min(Math.round(((event.pageX-left)/width)*10000),10000));
+	gantryMouseY = Math.max(0,Math.min(Math.round(((event.pageY-top)/height)*10000),10000));
+	//console.log("Mouse:"+gantryMouseX+","+gantryMouseY);
+}
+
+function getMouseX(){	
+	return gantryMouseX;
 }
 
 function getMouseY(){
-	var top = document.getElementById("gantryControl").offsetTop;
-	var y = Math.max(0,Math.min(mouseY-top,620));
-	return (y/620)*10000;
-//	return Math.floor((mouseY + 8)); // convert from pixels to steps
+	return gantryMouseY;
 }
 
 function getLastNumKey(){
